@@ -14,6 +14,7 @@ namespace square_algorithm
     {
         Bitmap bmp;
         List<Area> areasList = new List<Area>();
+        List<Point> pointsList = new List<Point>();
         public Form1()
         {
             areasList = new List<Area>();
@@ -32,7 +33,7 @@ namespace square_algorithm
             mainPictureBox.Size = new Size(207, 207);
             bmp = new Bitmap(mainPictureBox.Size.Width, mainPictureBox.Size.Height);
             Graphics flagGraphics = Graphics.FromImage(bmp);
-            //flagGraphics.FillRectangle(Brushes.Black, 0, 0, bmp.Width, bmp.Height);
+            flagGraphics.FillRectangle(Brushes.White, 0, 0, bmp.Width, bmp.Height);
             mainPictureBox.Image = bmp;
             mainPictureBox.Invalidate();
             
@@ -41,35 +42,75 @@ namespace square_algorithm
         public void GenerateAreas()
         {
             areasList.Clear();
-            int areasCount = 9;
-            int areasIterator = 0;
-            while (areasIterator < areasCount)
+            int areasCount = 3;
+            int w = (int)((bmp.Width-1) / areasCount);
+            int h = (int)((bmp.Height-1) / areasCount);
+            for (int i = 0; i < bmp.Height; i=i+h)
             {
-                areasList.Add(new Area(new Rectangle(0, 0, bmp.Size.Width / areasCount * 3, bmp.Size.Height / areasCount * 3)));
-                areasIterator++;
+                for (int j = 0; j < bmp.Width; j=j+w)
+                {
+                    areasList.Add(new Area(new Rectangle(j, i, j + w, i + h)));
+                }
             }
-
             DrawAreas();
         }
         public void DrawAreas()
         {
             Pen blackPen = new Pen(Color.Black, 1);
             Graphics flagGraphics = Graphics.FromImage(bmp);
-            for (int i = 0; i < bmp.Height; i++) //Y
-            { 
-                for (int j = 0; j < bmp.Width; j++) //X
+            foreach (Area a in areasList)
+            {
+                flagGraphics.DrawRectangle(blackPen, a.rect);
+
+            }
+            GeneratePoints();
+        }
+
+        public void GeneratePoints()
+        {
+            Random rnd = new Random();
+            int maxXvalue = bmp.Size.Width;
+            int maxYvalue = bmp.Size.Height;
+            int pointsCount = 30;
+            int pointsIterator = 0;
+            pointsList.Clear();
+            while (pointsIterator < pointsCount)
+            {
+                int x = rnd.Next(0, maxXvalue);
+                int y = rnd.Next(0, maxYvalue);
+                pointsList.Add(new Point(x, y));
+                pointsIterator++;
+            }
+            DrawRandomPoints();
+        }
+
+        public void DrawRandomPoints()
+        {
+            foreach (Point p in pointsList)
+            {
+                bmp.SetPixel(p.X, p.Y, Color.Red);
+            }
+        }
+
+        public void PointBelongs()
+        {
+            foreach (Point p in pointsList)
+            {
+                foreach (Area a in areasList)
                 {
-                    foreach (Area a in areasList)
+                    /*if ()
                     {
-                        if (j < a.rect.Width && i < a.rect.Height)
-                        {
-                           bmp.SetPixel(j, i, Color.Black);
-                        }
-                    }
+                       // внутри цикла по ректанглам смотрим, попадает ли точка внутрь ректангла
+                       // если да, то добавляем ее в массив point внутри объекта area и делаем break
+                    }*/
                 }
             }
-            
         }
-        
+
+        private void genButton_Click(object sender, EventArgs e)
+        {
+            CreateBitmapAtRuntime();
+            GenerateAreas();
+        }
     }
 }
