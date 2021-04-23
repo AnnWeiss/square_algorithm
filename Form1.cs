@@ -43,13 +43,13 @@ namespace square_algorithm
         {
             areasList.Clear();
             int areasCount = 3;
-            int w = (int)((bmp.Width-1) / areasCount);
-            int h = (int)((bmp.Height-1) / areasCount);
-            for (int i = 0; i < bmp.Height; i=i+h)
+            int w = (int)((bmp.Width) / areasCount);
+            int h = (int)((bmp.Height) / areasCount);
+            for (int i = 0; i < bmp.Height; i = i + h)
             {
-                for (int j = 0; j < bmp.Width; j=j+w)
+                for (int j = 0; j < bmp.Width; j = j + w)
                 {
-                    areasList.Add(new Area(new Rectangle(j, i, j + w, i + h)));
+                    areasList.Add(new Area(new Rectangle(j, i, w, h)));
                 }
             }
             DrawAreas();
@@ -90,6 +90,7 @@ namespace square_algorithm
             {
                 bmp.SetPixel(p.X, p.Y, Color.Red);
             }
+            PointBelongs();
         }
 
         public void PointBelongs()
@@ -98,11 +99,10 @@ namespace square_algorithm
             {
                 foreach (Area a in areasList)
                 {
-                    /*if ()
+                    if(a.rect.Contains(p))
                     {
-                       // внутри цикла по ректанглам смотрим, попадает ли точка внутрь ректангла
-                       // если да, то добавляем ее в массив point внутри объекта area и делаем break
-                    }*/
+                        a.points.Add(p);
+                    }
                 }
             }
         }
