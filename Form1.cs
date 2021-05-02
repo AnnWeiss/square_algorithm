@@ -43,8 +43,8 @@ namespace square_algorithm
         {
             areasList.Clear();
             int areasCount = 3;
-            int w = (int)((bmp.Width) / areasCount);
-            int h = (int)((bmp.Height) / areasCount);
+            int w = bmp.Width / areasCount;
+            int h = bmp.Height / areasCount;
             for (int i = 0; i < bmp.Height; i = i + h)
             {
                 for (int j = 0; j < bmp.Width; j = j + w)
@@ -71,7 +71,7 @@ namespace square_algorithm
             Random rnd = new Random();
             int maxXvalue = bmp.Size.Width;
             int maxYvalue = bmp.Size.Height;
-            int pointsCount = 30;
+            int pointsCount = 5;
             int pointsIterator = 0;
             pointsList.Clear();
             while (pointsIterator < pointsCount)
@@ -95,16 +95,52 @@ namespace square_algorithm
 
         public void PointBelongs()
         {
+            int areasCount = 3;
+            int w = bmp.Width / areasCount;
+            int h = bmp.Height / areasCount;
             foreach (Point p in pointsList)
             {
-                foreach (Area a in areasList)
+                int x1 = p.X / w;
+                int y1 = p.Y / h;
+                int areaNumber;
+                y1 *= areasCount;
+                areaNumber = x1 + y1;
+                areasList[areaNumber].points.Add(p);
+            }
+            FindBaseLine();
+        }
+
+        public void FindBaseLine()
+        {
+            //нам нужна стартовая точка, которая гарантированно входит в МВО, берем самую левую точку (по Х самое маленькое число)
+            int pointIterator = 0;
+            int indexStartPoint = 0;
+            int minX = 0, minY = 0;
+            foreach (Point p in pointsList)
+            {
+                if (pointIterator == 0)
                 {
-                    if(a.rect.Contains(p))
+                    minX = p.X;
+                    minY = p.Y;
+                    indexStartPoint = pointIterator;
+                }
+                else
+                {
+                    if (minX > p.X)
                     {
-                        a.points.Add(p);
+                        minX = p.X;
+                        minY = p.Y;
+                        indexStartPoint = pointIterator;
+                    }
+                    if (minX == p.X && minY < p.Y)
+                    {
+                        indexStartPoint = pointIterator;
                     }
                 }
+                pointIterator++;
             }
+            bmp.SetPixel(pointsList[indexStartPoint].X, pointsList[indexStartPoint].Y, Color.Blue);
+            //делаем стартовую вершину текущей, ищем самую правую точку относительно текущей вершины
         }
 
         private void genButton_Click(object sender, EventArgs e)
