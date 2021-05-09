@@ -15,6 +15,18 @@ namespace square_algorithm
         Bitmap bmp;
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
+
+        public static void Swap<T>(IList<T> list,  int indexA,  int indexB)
+        {
+            T tmp = list[indexA];
+            list[indexA] = list[indexB];
+            list[indexB] = tmp;
+        }
+
+        public int Rotate(Point A, Point B, Point C)
+        {
+            return ((B.X-A.X)*(C.Y-B.Y) - (B.Y-A.Y)*(C.X-B.X));
+        }
         public Form1()
         {
             areasList = new List<Area>();
@@ -71,7 +83,7 @@ namespace square_algorithm
             Random rnd = new Random();
             int maxXvalue = bmp.Size.Width;
             int maxYvalue = bmp.Size.Height;
-            int pointsCount = 5;
+            int pointsCount = 20;
             int pointsIterator = 0;
             pointsList.Clear();
             while (pointsIterator < pointsCount)
@@ -132,17 +144,34 @@ namespace square_algorithm
                         minY = p.Y;
                         indexStartPoint = pointIterator;
                     }
-                    if (minX == p.X && minY < p.Y)
+                    if (minX == p.X && minY > p.Y)
                     {
                         indexStartPoint = pointIterator;
                     }
                 }
                 pointIterator++;
             }
-            bmp.SetPixel(pointsList[indexStartPoint].X, pointsList[indexStartPoint].Y, Color.Blue);
-            //делаем стартовую вершину текущей, ищем самую правую точку относительно текущей вершины
-        }
+            //поместила стартовую точку в начало списка
+            Swap(pointsList, 0, indexStartPoint);
 
+            bmp.SetPixel(pointsList[0].X, pointsList[0].Y, Color.Blue);
+            //делаем стартовую вершину текущей, ищем самую правую точку относительно текущей вершины
+            for (int i=2; i < pointsList.Count; i++)
+            {
+                int j = i;
+                while (j>1 && Rotate(pointsList[0], pointsList[j-1], pointsList[j])<0)
+                {
+                    Swap(pointsList, j, j - 1);
+                    j--;
+                }
+            }
+            Pen blackPen = new Pen(Color.Black, 1);
+            using (var graphics = Graphics.FromImage(bmp))
+            {
+                graphics.DrawLine(blackPen, pointsList[0].X, pointsList[0].Y,
+                                            pointsList[1].X, pointsList[1].Y);
+            }
+        }
         private void genButton_Click(object sender, EventArgs e)
         {
             CreateBitmapAtRuntime();
