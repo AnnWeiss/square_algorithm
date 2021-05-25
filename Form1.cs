@@ -16,16 +16,10 @@ namespace square_algorithm
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
 
-        public static void Swap<T>(IList<T> list,  int indexA,  int indexB)
-        {
-            T tmp = list[indexA];
-            list[indexA] = list[indexB];
-            list[indexB] = tmp;
-        }
 
-        public int Rotate(Point A, Point B, Point C)
+        public int Rotate(int x1, int y1, int x2, int y2, int x3, int y3)
         {
-            return ((B.X-A.X)*(C.Y-B.Y) - (B.Y-A.Y)*(C.X-B.X));
+            return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2));
         }
         public Form1()
         {
@@ -126,14 +120,15 @@ namespace square_algorithm
         {
             //нам нужна стартовая точка, которая гарантированно входит в МВО, берем самую левую точку (по Х самое маленькое число)
             int pointIterator = 0;
-            int indexStartPoint = 0;
-            int minX = 0, minY = 0;
+            int indexStartPoint = 0, indexNextPoint = 0;
+            int minX = 0, minY = 0, maxX = 0;
             foreach (Point p in pointsList)
             {
                 if (pointIterator == 0)
                 {
                     minX = p.X;
                     minY = p.Y;
+                    maxX = p.X;
                     indexStartPoint = pointIterator;
                 }
                 else
@@ -148,28 +143,43 @@ namespace square_algorithm
                     {
                         indexStartPoint = pointIterator;
                     }
+
+                    if (maxX < p.X)
+                    {
+                        maxX = p.X;
+                        minY = p.Y;
+                        indexNextPoint = pointIterator;
+                    }
+                    if (minX == p.X && minY > p.Y)
+                    {
+                        indexNextPoint = pointIterator;
+                    }
                 }
                 pointIterator++;
             }
-            //поместила стартовую точку в начало списка
-            Swap(pointsList, 0, indexStartPoint);
 
-            bmp.SetPixel(pointsList[0].X, pointsList[0].Y, Color.Blue);
-            //делаем стартовую вершину текущей, ищем самую правую точку относительно текущей вершины
-            for (int i=2; i < pointsList.Count; i++)
+            for (int i = 0; i<pointsList.Count; i++)
             {
-                int j = i;
-                while (j>1 && Rotate(pointsList[0], pointsList[j-1], pointsList[j])<0)
+                if (pointsList[i] == pointsList[indexNextPoint])
                 {
-                    Swap(pointsList, j, j - 1);
-                    j--;
+                    continue;
+                }
+                if (pointsList[i] != pointsList[indexNextPoint])
+                {
+                    int result = Rotate(pointsList[indexStartPoint].X, pointsList[indexStartPoint].Y,
+                                        pointsList[indexNextPoint].X, pointsList[indexNextPoint].Y, pointsList[i].X, pointsList[i].Y);
+                    if (result > 0)
+                    {
+                        indexNextPoint = i;
+                    }
+
                 }
             }
-            Pen blackPen = new Pen(Color.Black, 1);
+            Pen blackPen = new Pen(Color.Green, 1);
             using (var graphics = Graphics.FromImage(bmp))
             {
-                graphics.DrawLine(blackPen, pointsList[0].X, pointsList[0].Y,
-                                            pointsList[1].X, pointsList[1].Y);
+                graphics.DrawLine(blackPen, pointsList[indexStartPoint].X, pointsList[indexStartPoint].Y,
+                                            pointsList[indexNextPoint].X, pointsList[indexNextPoint].Y);
             }
         }
         private void genButton_Click(object sender, EventArgs e)
