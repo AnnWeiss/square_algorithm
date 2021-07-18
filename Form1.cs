@@ -16,10 +16,30 @@ namespace square_algorithm
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
 
-
-        public int Rotate(int x1, int y1, int x2, int y2, int x3, int y3)
+        struct Nums
         {
-            return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2));
+            private int upperNum, upperRightNum, rightNum, downNum, downRightNum;
+            public Nums(int _upperNum, int _upperRightNum, int _rightNum, int _downNum, int _downRightNum)
+            {
+                upperNum = _upperNum;
+                upperRightNum = _upperRightNum;
+                rightNum = _rightNum;
+                downNum = _downNum;
+                downRightNum = _downRightNum;
+            }
+
+            public void searchForNeighbors(int areaCount, int number)
+            {
+                upperNum = number - areaCount;
+                upperRightNum = number - areaCount + 1;
+                rightNum = number + 1;
+                downNum = number + areaCount;
+                downRightNum = number + areaCount + 1;
+            }
+        }
+        public int Rotate(Point A, Point B, Point C)
+        {
+            return ((B.X - A.X) * (C.Y - B.Y) - (B.Y - A.Y) * (C.X - B.X));
         }
         public Form1()
         {
@@ -77,7 +97,7 @@ namespace square_algorithm
             Random rnd = new Random();
             int maxXvalue = bmp.Size.Width;
             int maxYvalue = bmp.Size.Height;
-            int pointsCount = 20;
+            int pointsCount = 10;
             int pointsIterator = 0;
             pointsList.Clear();
             while (pointsIterator < pointsCount)
@@ -92,9 +112,10 @@ namespace square_algorithm
 
         public void DrawRandomPoints()
         {
+            Graphics flagGraphics = Graphics.FromImage(bmp);
             foreach (Point p in pointsList)
             {
-                bmp.SetPixel(p.X, p.Y, Color.Red);
+                flagGraphics.FillEllipse(Brushes.Red, p.X-2, p.Y-2, 4, 4);
             }
             PointBelongs();
         }
@@ -118,62 +139,29 @@ namespace square_algorithm
 
         public void FindBaseLine()
         {
-            //нам нужна стартовая точка, которая гарантированно входит в МВО, берем самую левую точку (по Х самое маленькое число)
-            int pointIterator = 0;
-            int indexStartPoint = 0, indexNextPoint = 0;
-            int minX = 0, minY = 0, maxX = 0;
-            foreach (Point p in pointsList)
+            if (pointsList.Count < 2)
             {
-                if (pointIterator == 0)
-                {
-                    minX = p.X;
-                    minY = p.Y;
-                    maxX = p.X;
-                    indexStartPoint = pointIterator;
-                }
-                else
-                {
-                    if (minX > p.X)
-                    {
-                        minX = p.X;
-                        minY = p.Y;
-                        indexStartPoint = pointIterator;
-                    }
-                    if (minX == p.X && minY > p.Y)
-                    {
-                        indexStartPoint = pointIterator;
-                    }
-
-                    if (maxX < p.X)
-                    {
-                        maxX = p.X;
-                        minY = p.Y;
-                        indexNextPoint = pointIterator;
-                    }
-                    if (minX == p.X && minY > p.Y)
-                    {
-                        indexNextPoint = pointIterator;
-                    }
-                }
-                pointIterator++;
+                throw new Exception("Точек меньше двух");
             }
-
-            for (int i = 0; i<pointsList.Count; i++)
+            int indexStartPoint = 0;
+            for (int i = 0; i < pointsList.Count; i++)
             {
-                if (pointsList[i] == pointsList[indexNextPoint])
+                if (pointsList[i].X < pointsList[indexStartPoint].X)
                 {
-                    continue;
+                    indexStartPoint = i;
                 }
-                if (pointsList[i] != pointsList[indexNextPoint])
+            }
+            int indexNextPoint = indexStartPoint == 0 ? 1 : 0;
+            for (int i = 0; i < pointsList.Count; i++)
+            {
+                if ((indexStartPoint!=indexNextPoint) && (Rotate(pointsList[indexStartPoint],pointsList[indexNextPoint],pointsList[i])>0))
                 {
-                    int result = Rotate(pointsList[indexStartPoint].X, pointsList[indexStartPoint].Y,
-                                        pointsList[indexNextPoint].X, pointsList[indexNextPoint].Y, pointsList[i].X, pointsList[i].Y);
-                    if (result > 0)
-                    {
-                        indexNextPoint = i;
-                    }
-
+                    indexNextPoint = i;
                 }
+            }
+            if (indexNextPoint==indexStartPoint)
+            {
+                throw new Exception("Ошибка алгоритма");
             }
             Pen blackPen = new Pen(Color.Green, 1);
             using (var graphics = Graphics.FromImage(bmp))
@@ -181,11 +169,35 @@ namespace square_algorithm
                 graphics.DrawLine(blackPen, pointsList[indexStartPoint].X, pointsList[indexStartPoint].Y,
                                             pointsList[indexNextPoint].X, pointsList[indexNextPoint].Y);
             }
+            //нужные области для базовой линии
+            int areaNumber1 = -1, areaNumber2 = -1;
+            for (int i = 0; i < areasList.Count; i++)
+            {
+                if (areasList[i].rect.Contains(pointsList[indexStartPoint]))
+                {
+                    areaNumber1 = i;
+                }
+                if (areasList[i].rect.Contains(pointsList[indexNextPoint]))
+                {
+                    areaNumber2 = i;
+                }
+            }
+            Nums numms1 = new Nums(-1, -1, -1, -1, -1);
+            numms1.searchForNeighbors(3, areaNumber1);
+            Nums numms2 = new Nums(-1, -1, -1, -1, -1);
+            numms2.searchForNeighbors(3, areaNumber2);
         }
+
+
         private void genButton_Click(object sender, EventArgs e)
         {
             CreateBitmapAtRuntime();
             GenerateAreas();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FindBaseLine();
         }
     }
 }

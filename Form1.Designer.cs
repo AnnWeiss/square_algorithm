@@ -31,6 +31,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.mainPictureBox = new System.Windows.Forms.PictureBox();
             this.genButton = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -51,6 +52,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.button1);
             this.splitContainer1.Panel2.Controls.Add(this.genButton);
             this.splitContainer1.Size = new System.Drawing.Size(800, 450);
             this.splitContainer1.SplitterDistance = 620;
@@ -73,6 +75,16 @@
             this.genButton.Text = "Generate";
             this.genButton.UseVisualStyleBackColor = true;
             this.genButton.Click += new System.EventHandler(this.genButton_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(60, 188);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 42);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
@@ -97,6 +109,7 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.PictureBox mainPictureBox;
         private System.Windows.Forms.Button genButton;
+        private System.Windows.Forms.Button button1;
     }
 }
 
