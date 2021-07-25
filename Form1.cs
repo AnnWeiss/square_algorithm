@@ -15,6 +15,7 @@ namespace square_algorithm
         Bitmap bmp;
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
+        List<Point> verticesList = new List<Point>();
 
         struct Nums
         {
@@ -76,6 +77,10 @@ namespace square_algorithm
                 for (int j = 0; j < bmp.Width; j = j + w)
                 {
                     areasList.Add(new Area(new Rectangle(j, i, w, h)));
+                    verticesList.Add(new Point(j,i));
+                    verticesList.Add(new Point(j, i+h));
+                    verticesList.Add(new Point(j+w, i));
+                    verticesList.Add(new Point(j+w, i+h));
                 }
             }
             DrawAreas();
@@ -87,7 +92,6 @@ namespace square_algorithm
             foreach (Area a in areasList)
             {
                 flagGraphics.DrawRectangle(blackPen, a.rect);
-
             }
             GeneratePoints();
         }
@@ -117,6 +121,10 @@ namespace square_algorithm
             {
                 flagGraphics.FillEllipse(Brushes.Red, p.X-2, p.Y-2, 4, 4);
             }
+            foreach (Point p in verticesList)
+            {
+                flagGraphics.FillEllipse(Brushes.Blue, p.X - 2, p.Y - 2, 4, 4);
+            }
             PointBelongs();
         }
 
@@ -133,6 +141,37 @@ namespace square_algorithm
                 y1 *= areasCount;
                 areaNumber = x1 + y1;
                 areasList[areaNumber].points.Add(p);
+            }
+            //принадлежность вершин к прямоугольникам
+            for (int i = 0; i < areasList.Count; i++)
+            {
+                int some = 8;
+                int n = 4;
+                if (i==0)
+                {
+                    for (int j = 0; j < verticesList.Count; j++)
+                    {
+                        if (j < 4)
+                        {
+                            areasList[i].vertices.Add(verticesList[j]);
+                        }
+                    }
+                }
+                else
+                {
+                    for (int k = n; k < verticesList.Count; k+=4)
+                    {
+                        if (k < some)
+                        {
+                            areasList[i].vertices.Add(verticesList[k]);
+                            areasList[i].vertices.Add(verticesList[k + 1]);
+                            areasList[i].vertices.Add(verticesList[k + 2]);
+                            areasList[i].vertices.Add(verticesList[k + 3]);
+                            n += 4;
+                        }
+                    }
+                    some += 4;
+                }
             }
             FindBaseLine();
         }
@@ -186,6 +225,75 @@ namespace square_algorithm
             numms1.searchForNeighbors(3, areaNumber1);
             Nums numms2 = new Nums(-1, -1, -1, -1, -1);
             numms2.searchForNeighbors(3, areaNumber2);
+
+            //для линии соседи
+            List<Nums> numslist = new List<Nums>();
+            numslist.Clear();
+            for (int i = 0; i < areasList.Count; i++)
+            {
+                int one = 0, two = 0, three = 0, four = 0;
+                for (int j = 0; j < areasList[i].vertices.Count; j++)
+                {
+                    if (j==0)
+                    {
+                        one = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                    }
+                    if (j == 1)
+                    {
+                        two = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                    }
+                    if (j==2)
+                    {
+                        three = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                    }
+                    if (j==3)
+                    {
+                        four = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                    }
+                }
+                if (one < 0 && two < 0 && three > 0 && four > 0)
+                {
+                    int area1 = i;
+                    Nums numms3 = new Nums(-1, -1, -1, -1, -1);
+                    numms3.searchForNeighbors(3, area1);
+                    numslist.Add(numms3);
+                }
+                if (two < 0 && three < 0 && one > 0 && four > 0)
+                {
+                    int area = i;
+                    Nums numms4 = new Nums(-1, -1, -1, -1, -1);
+                    numms4.searchForNeighbors(3, area);
+                    numslist.Add(numms4);
+                }
+                if (three < 0 && four < 0 && one > 0 && two > 0)
+                {
+                    int area = i;
+                    Nums numms5 = new Nums(-1, -1, -1, -1, -1);
+                    numms5.searchForNeighbors(3, area);
+                    numslist.Add(numms5);
+                }
+                if (one < 0 && four < 0 && two > 0 && three > 0)
+                {
+                    int area = i;
+                    Nums numms6 = new Nums(-1, -1, -1, -1, -1);
+                    numms6.searchForNeighbors(3, area);
+                    numslist.Add(numms6);
+                }
+                if (one < 0 && three < 0 && two > 0 && four > 0)
+                {
+                    int area = i;
+                    Nums numms7 = new Nums(-1, -1, -1, -1, -1);
+                    numms7.searchForNeighbors(3, area);
+                    numslist.Add(numms7);
+                }
+                if (two < 0 && four < 0 && one > 0 && three > 0)
+                {
+                    int area = i;
+                    Nums numms8 = new Nums(-1, -1, -1, -1, -1);
+                    numms8.searchForNeighbors(3, area);
+                    numslist.Add(numms8);
+                }
+            }
         }
 
 
