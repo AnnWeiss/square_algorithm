@@ -229,6 +229,7 @@ namespace square_algorithm
             //для линии соседи
             List<Nums> numslist = new List<Nums>();
             numslist.Clear();
+            int vertIterator = 0;
             for (int i = 0; i < areasList.Count; i++)
             {
                 int one = 0, two = 0, three = 0, four = 0;
@@ -236,19 +237,23 @@ namespace square_algorithm
                 {
                     if (j==0)
                     {
-                        one = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                        one = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
+                        vertIterator++;
                     }
                     if (j == 1)
                     {
-                        two = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                        two = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
+                        vertIterator++;
                     }
                     if (j==2)
                     {
-                        three = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                        three = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
+                        vertIterator++;
                     }
                     if (j==3)
                     {
-                        four = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[j]);
+                        four = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
+                        vertIterator++;
                     }
                 }
                 if (one < 0 && two < 0 && three > 0 && four > 0)
