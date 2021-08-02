@@ -42,6 +42,15 @@ namespace square_algorithm
         {
             return ((B.X - A.X) * (C.Y - B.Y) - (B.Y - A.Y) * (C.X - B.X));
         }
+
+        public bool isContainindexes(int area, int idx)
+        {
+            if (areasList[area].rect.Contains(pointsList[idx]))
+            {
+                return true;
+            }
+            return false;
+        }
         public Form1()
         {
             areasList = new List<Area>();
@@ -256,48 +265,15 @@ namespace square_algorithm
                         vertIterator++;
                     }
                 }
-                if (one < 0 && two < 0 && three > 0 && four > 0)
+                if ((one > 0 && two > 0 && three > 0 && four > 0) && (!isContainindexes(i, indexNextPoint)) && ((!isContainindexes(i, indexStartPoint))) ||
+                    ((one < 0 && two < 0 && three < 0 && four < 0)&&(!isContainindexes(i,indexNextPoint))&&((!isContainindexes(i, indexStartPoint)))))
                 {
-                    int area1 = i;
-                    Nums numms3 = new Nums(-1, -1, -1, -1, -1);
-                    numms3.searchForNeighbors(3, area1);
-                    numslist.Add(numms3);
+                    continue;
                 }
-                if (two < 0 && three < 0 && one > 0 && four > 0)
-                {
-                    int area = i;
-                    Nums numms4 = new Nums(-1, -1, -1, -1, -1);
-                    numms4.searchForNeighbors(3, area);
-                    numslist.Add(numms4);
-                }
-                if (three < 0 && four < 0 && one > 0 && two > 0)
-                {
-                    int area = i;
-                    Nums numms5 = new Nums(-1, -1, -1, -1, -1);
-                    numms5.searchForNeighbors(3, area);
-                    numslist.Add(numms5);
-                }
-                if (one < 0 && four < 0 && two > 0 && three > 0)
-                {
-                    int area = i;
-                    Nums numms6 = new Nums(-1, -1, -1, -1, -1);
-                    numms6.searchForNeighbors(3, area);
-                    numslist.Add(numms6);
-                }
-                if (one < 0 && three < 0 && two > 0 && four > 0)
-                {
-                    int area = i;
-                    Nums numms7 = new Nums(-1, -1, -1, -1, -1);
-                    numms7.searchForNeighbors(3, area);
-                    numslist.Add(numms7);
-                }
-                if (two < 0 && four < 0 && one > 0 && three > 0)
-                {
-                    int area = i;
-                    Nums numms8 = new Nums(-1, -1, -1, -1, -1);
-                    numms8.searchForNeighbors(3, area);
-                    numslist.Add(numms8);
-                }
+                int area1 = i;
+                Nums numms3 = new Nums(-1, -1, -1, -1, -1);
+                numms3.searchForNeighbors(3, area1);
+                numslist.Add(numms3);
             }
         }
 
