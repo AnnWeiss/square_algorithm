@@ -42,7 +42,6 @@ namespace square_algorithm
         {
             return ((B.X - A.X) * (C.Y - B.Y) - (B.Y - A.Y) * (C.X - B.X));
         }
-
         public bool isContainindexes(int area, int idx)
         {
             if (areasList[area].rect.Contains(pointsList[idx]))
@@ -134,6 +133,9 @@ namespace square_algorithm
             {
                 flagGraphics.FillEllipse(Brushes.Blue, p.X - 2, p.Y - 2, 4, 4);
             }
+
+            //flagGraphics.FillEllipse(Brushes.Pink, verticesList[24].X - 2, verticesList[24].Y - 2, 4, 4);
+
             PointBelongs();
         }
 
@@ -244,7 +246,7 @@ namespace square_algorithm
                 int one = 0, two = 0, three = 0, four = 0;
                 for (int j = 0; j < areasList[i].vertices.Count; j++)
                 {
-                    if (j==0)
+                    if (j == 0)
                     {
                         one = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
                         vertIterator++;
@@ -254,19 +256,23 @@ namespace square_algorithm
                         two = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
                         vertIterator++;
                     }
-                    if (j==2)
+                    if (j == 2)
                     {
                         three = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
                         vertIterator++;
                     }
-                    if (j==3)
+                    if (j == 3)
                     {
                         four = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
                         vertIterator++;
+                    
                     }
                 }
-                if ((one > 0 && two > 0 && three > 0 && four > 0) && (!isContainindexes(i, indexNextPoint)) && ((!isContainindexes(i, indexStartPoint))) ||
-                    ((one < 0 && two < 0 && three < 0 && four < 0)&&(!isContainindexes(i,indexNextPoint))&&((!isContainindexes(i, indexStartPoint)))))
+                if ( (one > 0 && two > 0 && three > 0 && four > 0) || ((one < 0 && two < 0 && three < 0 && four < 0)) )
+                {
+                    continue;
+                }
+                if (isContainindexes(i, indexStartPoint) == true || isContainindexes(i, indexNextPoint) == true)
                 {
                     continue;
                 }
