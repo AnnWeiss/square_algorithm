@@ -15,8 +15,6 @@ namespace square_algorithm
         Bitmap bmp;
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
-        List<Point> verticesList = new List<Point>();
-
         struct Nums
         {
             private int upperNum, upperRightNum, rightNum, downNum, downRightNum;
@@ -85,10 +83,6 @@ namespace square_algorithm
                 for (int j = 0; j < bmp.Width; j = j + w)
                 {
                     areasList.Add(new Area(new Rectangle(j, i, w, h)));
-                    verticesList.Add(new Point(j,i));
-                    verticesList.Add(new Point(j, i+h));
-                    verticesList.Add(new Point(j+w, i));
-                    verticesList.Add(new Point(j+w, i+h));
                 }
             }
             DrawAreas();
@@ -129,13 +123,6 @@ namespace square_algorithm
             {
                 flagGraphics.FillEllipse(Brushes.Red, p.X-2, p.Y-2, 4, 4);
             }
-            foreach (Point p in verticesList)
-            {
-                flagGraphics.FillEllipse(Brushes.Blue, p.X - 2, p.Y - 2, 4, 4);
-            }
-
-            //flagGraphics.FillEllipse(Brushes.Pink, verticesList[24].X - 2, verticesList[24].Y - 2, 4, 4);
-
             PointBelongs();
         }
 
@@ -154,35 +141,12 @@ namespace square_algorithm
                 areasList[areaNumber].points.Add(p);
             }
             //принадлежность вершин к прямоугольникам
-            for (int i = 0; i < areasList.Count; i++)
+            for (int k = 0; k < areasList.Count; k++)
             {
-                int some = 8;
-                int n = 4;
-                if (i==0)
-                {
-                    for (int j = 0; j < verticesList.Count; j++)
-                    {
-                        if (j < 4)
-                        {
-                            areasList[i].vertices.Add(verticesList[j]);
-                        }
-                    }
-                }
-                else
-                {
-                    for (int k = n; k < verticesList.Count; k+=4)
-                    {
-                        if (k < some)
-                        {
-                            areasList[i].vertices.Add(verticesList[k]);
-                            areasList[i].vertices.Add(verticesList[k + 1]);
-                            areasList[i].vertices.Add(verticesList[k + 2]);
-                            areasList[i].vertices.Add(verticesList[k + 3]);
-                            n += 4;
-                        }
-                    }
-                    some += 4;
-                }
+                areasList[k].vertices.Add(new Point(areasList[k].rect.X, areasList[k].rect.Y));
+                areasList[k].vertices.Add(new Point(areasList[k].rect.X+w, areasList[k].rect.Y));
+                areasList[k].vertices.Add(new Point(areasList[k].rect.X, areasList[k].rect.Y+h));
+                areasList[k].vertices.Add(new Point(areasList[k].rect.X+w, areasList[k].rect.Y+h));
             }
             FindBaseLine();
         }
@@ -220,66 +184,82 @@ namespace square_algorithm
                                             pointsList[indexNextPoint].X, pointsList[indexNextPoint].Y);
             }
             //нужные области для базовой линии
-            int areaNumber1 = -1, areaNumber2 = -1;
+            int areaNumberSP = -1, areaNumberNP = -1;
             for (int i = 0; i < areasList.Count; i++)
             {
                 if (areasList[i].rect.Contains(pointsList[indexStartPoint]))
                 {
-                    areaNumber1 = i;
+                    areaNumberSP = i;
                 }
                 if (areasList[i].rect.Contains(pointsList[indexNextPoint]))
                 {
-                    areaNumber2 = i;
+                    areaNumberNP = i;
                 }
             }
-            Nums numms1 = new Nums(-1, -1, -1, -1, -1);
-            numms1.searchForNeighbors(3, areaNumber1);
-            Nums numms2 = new Nums(-1, -1, -1, -1, -1);
-            numms2.searchForNeighbors(3, areaNumber2);
-
             //для линии соседи
             List<Nums> numslist = new List<Nums>();
             numslist.Clear();
-            int vertIterator = 0;
-            for (int i = 0; i < areasList.Count; i++)
+            //вершины областей iSP iNP
+            int areasCount = 3;
+            int xI1 = -1, yJ1 = -1, xI2=-1, yJ2=-1;
+            int[,] Matrix = new int[areasCount, areasCount];
+            int k = 0;
+            for (int i = 0; i < areasCount; i++)
+            {
+                for (int j = 0; j < areasCount; j++)
+                {
+                    Matrix[i, j] = k++; //заполняю матрицу
+                    if (Matrix[i, j] == areaNumberSP)
+                    {
+                        xI1 = i;
+                        yJ1 = j;
+                    }
+                    if (Matrix[i, j] == areaNumberNP)
+                    {
+                        xI2 = i;
+                        yJ2 = j;
+                    }
+                }
+            }
+            if (xI1 > xI2)
+            {
+                //swap
+                xI1 = xI1 + xI2;
+                xI2 = xI1 - xI2;
+                xI1 = xI1 - xI2;
+            }
+            if (yJ1 > yJ2)
+            {
+                //swap
+                yJ1 = yJ1 + yJ2;
+                yJ2 = yJ1 - yJ2;
+                yJ1 = yJ1 - yJ2;
+            }
+            //рассматриваем в диапазоне
+            for (int i = xI1; i <= xI2; i++)
             {
                 int one = 0, two = 0, three = 0, four = 0;
-                for (int j = 0; j < areasList[i].vertices.Count; j++)
+                for (int j = yJ1; j <= yJ2; j++)
                 {
-                    if (j == 0)
+                    int val = Matrix[i,j];
+                    one = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(0));
+                    two = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(1));
+                    three = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(2));
+                    four = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(3));
+
+                    if ((one < 0 && two < 0 && three < 0 && four < 0) || (one > 0 && two > 0 && three > 0 && four > 0))
                     {
-                        one = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
-                        vertIterator++;
+                        continue;
                     }
-                    if (j == 1)
+                    else
                     {
-                        two = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
-                        vertIterator++;
+                        int area1 = Matrix[i, j];
+                        Nums numms3 = new Nums(-1, -1, -1, -1, -1);
+                        numms3.searchForNeighbors(3, area1);
+                        numslist.Add(numms3);
                     }
-                    if (j == 2)
-                    {
-                        three = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
-                        vertIterator++;
-                    }
-                    if (j == 3)
-                    {
-                        four = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], verticesList[vertIterator]);
-                        vertIterator++;
-                    
-                    }
+
                 }
-                if ( (one > 0 && two > 0 && three > 0 && four > 0) || ((one < 0 && two < 0 && three < 0 && four < 0)) )
-                {
-                    continue;
-                }
-                if (isContainindexes(i, indexStartPoint) == true || isContainindexes(i, indexNextPoint) == true)
-                {
-                    continue;
-                }
-                int area1 = i;
-                Nums numms3 = new Nums(-1, -1, -1, -1, -1);
-                numms3.searchForNeighbors(3, area1);
-                numslist.Add(numms3);
             }
         }
 

@@ -19,5 +19,9 @@ namespace square_algorithm
             points = new List<Point>();
             vertices = new List<Point>();
         }
+        public Point getVertice(int value)
+        {
+            return vertices[value];
+        }
     }
 }
