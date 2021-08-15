@@ -15,11 +15,18 @@ namespace square_algorithm
         Bitmap bmp;
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
-        struct Nums
+        List<Nums> numsList = new List<Nums>();
+        public struct Nums
         {
-            private int upperNum, upperRightNum, rightNum, downNum, downRightNum;
-            public Nums(int _upperNum, int _upperRightNum, int _rightNum, int _downNum, int _downRightNum)
+            public int num { get; set; }
+            public int upperNum { get; set; }
+            public int upperRightNum { get; set; }
+            public int rightNum { get; set; }
+            public int downNum { get; set; }
+            public int downRightNum { get; set; }
+            public Nums(int _num, int _upperNum, int _upperRightNum, int _rightNum, int _downNum, int _downRightNum)
             {
+                num = _num;
                 upperNum = _upperNum;
                 upperRightNum = _upperRightNum;
                 rightNum = _rightNum;
@@ -29,6 +36,7 @@ namespace square_algorithm
 
             public void searchForNeighbors(int areaCount, int number)
             {
+                num = number;
                 upperNum = number - areaCount;
                 upperRightNum = number - areaCount + 1;
                 rightNum = number + 1;
@@ -39,14 +47,6 @@ namespace square_algorithm
         public int Rotate(Point A, Point B, Point C)
         {
             return ((B.X - A.X) * (C.Y - B.Y) - (B.Y - A.Y) * (C.X - B.X));
-        }
-        public bool isContainindexes(int area, int idx)
-        {
-            if (areasList[area].rect.Contains(pointsList[idx]))
-            {
-                return true;
-            }
-            return false;
         }
         public Form1()
         {
@@ -197,8 +197,7 @@ namespace square_algorithm
                 }
             }
             //для линии соседи
-            List<Nums> numslist = new List<Nums>();
-            numslist.Clear();
+            numsList.Clear();
             //вершины областей iSP iNP
             int areasCount = 3;
             int xI1 = -1, yJ1 = -1, xI2=-1, yJ2=-1;
@@ -254,15 +253,80 @@ namespace square_algorithm
                     else
                     {
                         int area1 = Matrix[i, j];
-                        Nums numms3 = new Nums(-1, -1, -1, -1, -1);
+                        Nums numms3 = new Nums(-1,-1, -1, -1, -1, -1);
                         numms3.searchForNeighbors(3, area1);
-                        numslist.Add(numms3);
+                        numsList.Add(numms3);
                     }
-
                 }
             }
+            cellsBypassing(numsList, areasCount);
         }
+        public void cellsBypassing(List<Nums> nums, int arcount)
+        {
+            int size = arcount * arcount;
+            List<Nums> numsList2 = new List<Nums>();
 
+            for (int i = 0; i < nums.Count; i++)
+            {
+                double URN = nums[i].upperRightNum;
+                URN = URN / arcount * 10;
+                URN %= 10;
+
+                double RN = nums[i].rightNum;
+                RN = RN / arcount * 10;
+                RN %= 10;
+
+                double DRN = nums[i].downRightNum;
+                DRN = DRN / arcount * 10;
+                DRN %= 10;
+
+                if (areasList[nums[i].num].wasVisited == false)
+                {
+                    areasList[nums[i].num].wasVisited = true;
+
+                }
+                if ( nums[i].upperNum >= 0 && areasList[nums[i].upperNum].wasVisited == false)
+                {
+                    areasList[nums[i].upperNum].wasVisited = true;
+                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    numms3.searchForNeighbors(arcount, nums[i].upperNum);
+                    numsList2.Add(numms3);
+                }
+                if (nums[i].upperRightNum > 0 && URN > 0 && areasList[nums[i].upperRightNum].wasVisited == false)
+                {
+                    areasList[nums[i].upperRightNum].wasVisited = true;
+                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    numms3.searchForNeighbors(arcount, nums[i].upperRightNum);
+                    numsList2.Add(numms3);
+                }
+                if (nums[i].rightNum >= 0 && RN > 0 && areasList[nums[i].rightNum].wasVisited == false)
+                {
+                    areasList[nums[i].rightNum].wasVisited = true;
+                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    numms3.searchForNeighbors(arcount, nums[i].rightNum);
+                    numsList2.Add(numms3);
+                }
+                if (nums[i].downNum >= 0 && nums[i].downNum < size && areasList[nums[i].downNum].wasVisited == false)
+                {
+                    areasList[nums[i].downNum].wasVisited = true;
+                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    numms3.searchForNeighbors(arcount, nums[i].downNum);
+                    numsList2.Add(numms3);
+                }
+                if (nums[i].downRightNum >= 0 && nums[i].downRightNum < size && DRN > 0 && areasList[nums[i].downRightNum].wasVisited == false)
+                {
+                    areasList[nums[i].downRightNum].wasVisited = true;
+                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    numms3.searchForNeighbors(arcount, nums[i].downRightNum);
+                    numsList2.Add(numms3);
+                }
+            }
+            if (numsList2.Count == 0)
+            {
+                return;
+            }
+            cellsBypassing(numsList2, arcount);
+        }
 
         private void genButton_Click(object sender, EventArgs e)
         {
