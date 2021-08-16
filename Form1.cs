@@ -271,10 +271,10 @@ namespace square_algorithm
                 int URN = nums[i].upperRightNum;
                 URN %= arcount;
 
-                double RN = nums[i].rightNum;
+                int RN = nums[i].rightNum;
                 RN %= arcount;
 
-                double DRN = nums[i].downRightNum;
+                int DRN = nums[i].downRightNum;
                 DRN %= arcount;
 
                 if (areasList[nums[i].num].wasVisited == false)
