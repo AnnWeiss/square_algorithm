@@ -268,17 +268,14 @@ namespace square_algorithm
 
             for (int i = 0; i < nums.Count; i++)
             {
-                double URN = nums[i].upperRightNum;
-                URN = URN / arcount * 10;
-                URN %= 10;
+                int URN = nums[i].upperRightNum;
+                URN %= arcount;
 
                 double RN = nums[i].rightNum;
-                RN = RN / arcount * 10;
-                RN %= 10;
+                RN %= arcount;
 
                 double DRN = nums[i].downRightNum;
-                DRN = DRN / arcount * 10;
-                DRN %= 10;
+                DRN %= arcount;
 
                 if (areasList[nums[i].num].wasVisited == false)
                 {
