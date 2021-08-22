@@ -103,7 +103,7 @@ namespace square_algorithm
             Random rnd = new Random();
             int maxXvalue = bmp.Size.Width;
             int maxYvalue = bmp.Size.Height;
-            int pointsCount = 10;
+            int pointsCount = 30;
             int pointsIterator = 0;
             pointsList.Clear();
             while (pointsIterator < pointsCount)
@@ -258,10 +258,72 @@ namespace square_algorithm
                         numsList.Add(numms3);
                     }
                 }
+                foreach(Nums n in numsList)
+                {
+                    areasList[n.num].wasVisited = true;
+                }
             }
-            cellsBypassing(numsList, areasCount);
+            isEmptyArea(numsList, areasCount, pointsList[indexStartPoint], pointsList[indexNextPoint]);
         }
-        public void cellsBypassing(List<Nums> nums, int arcount)
+        public void isEmptyArea(List<Nums> nums, int arcount, Point SP, Point NP)
+        {
+            List<Nums> newList = new List<Nums>();
+            newList = cellsBypassing(nums, arcount);
+
+            int pCount = 0;
+            for (int i = 0; i < newList.Count; i++)
+            {
+                int z = areasList[newList[i].num].getListPoints().Count;
+                pCount += z;
+            }
+            if (pCount > 0 )
+            {
+                setTriangle(SP, NP, newList);
+            }
+            if (pCount == 0)
+            {
+                isEmptyArea(newList, arcount, SP, NP);
+            }
+        }
+
+        public double getLineLength(Point A, Point B)
+        {
+            double xVal = Math.Pow(B.X - A.X, 2);
+            double yVal = Math.Pow(B.Y - A.Y, 2);
+            double dist = Math.Sqrt(xVal + yVal);
+            return dist;
+        }
+        public void setTriangle(Point A, Point B, List<Nums> nums)
+        {
+            double AB = getLineLength(A, B); //c
+            double finalGamma = 0;
+            int a = 0, n = 0;
+            for (int i = 0; i < nums.Count; i++)
+            {
+                List<Point> newList = new List<Point>();
+                newList = areasList[nums[i].num].getListPoints();
+
+                for (int k = 0; k < newList.Count; k++)//перебор листа поинтов num ректангла
+                {
+                    double AC = getLineLength(A, newList[k]); //b
+                    double CB = getLineLength(newList[k], B); //a
+                    double gamma = Math.Acos((CB * CB + AC * AC - AB * AB) / (2 * CB * AC)) * 180 / Math.PI;
+                    if (gamma > finalGamma)
+                    {
+                        finalGamma = gamma;
+                        a = k;
+                        n = i;
+                    }
+                }
+            }
+            Graphics flagGraphics = Graphics.FromImage(bmp);
+            Pen bluePen = new Pen(Color.Blue, 1);
+            flagGraphics.DrawLine(bluePen, A.X, A.Y,
+                                            areasList[nums[n].num].points[a].X, areasList[nums[n].num].points[a].Y);
+            flagGraphics.DrawLine(bluePen, B.X, B.Y,
+                                            areasList[nums[n].num].points[a].X, areasList[nums[n].num].points[a].Y);
+        }
+        public List<Nums> cellsBypassing(List<Nums> nums, int arcount)
         {
             int size = arcount * arcount;
             List<Nums> numsList2 = new List<Nums>();
@@ -280,7 +342,6 @@ namespace square_algorithm
                 if (areasList[nums[i].num].wasVisited == false)
                 {
                     areasList[nums[i].num].wasVisited = true;
-
                 }
                 if ( nums[i].upperNum >= 0 && areasList[nums[i].upperNum].wasVisited == false)
                 {
@@ -318,11 +379,7 @@ namespace square_algorithm
                     numsList2.Add(numms3);
                 }
             }
-            if (numsList2.Count == 0)
-            {
-                return;
-            }
-            cellsBypassing(numsList2, arcount);
+            return numsList2;
         }
 
         private void genButton_Click(object sender, EventArgs e)

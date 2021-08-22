@@ -25,5 +25,9 @@ namespace square_algorithm
         {
             return vertices[value];
         }
+        public List<Point> getListPoints()
+        {
+            return points;
+        }
     }
 }
