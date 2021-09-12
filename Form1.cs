@@ -18,6 +18,7 @@ namespace square_algorithm
         List<Point> pointsList = new List<Point>();
         List<Nums> numsList = new List<Nums>();
         Queue lineQueue = new Queue();
+        List<Nums> numsListsec = new List<Nums>();
         public struct Nums
         {
             public int num { get; set; }
@@ -52,7 +53,7 @@ namespace square_algorithm
         }
         public Form1()
         {
-            areasList = new List<Area>();
+            //areasList = new List<Area>();
             InitializeComponent();
         }
 
@@ -279,33 +280,86 @@ namespace square_algorithm
         {
             if (lineQueue.Count >= 2)
             {
-                Point A = (Point)lineQueue.Dequeue();
-                Point B = (Point)lineQueue.Dequeue();
-                nums = isEmptyArea(ref nums, arcount, A, B);
-
+                int a = lineQueue.Count;
+                Point[] pointsArray = new Point[a];
+                for (int i = 0; i < a; i += 2)
+                {
+                    pointsArray[i] = (Point)lineQueue.Dequeue();
+                    pointsArray[i + 1] = (Point)lineQueue.Dequeue();
+                }
+                for (int i = 0; i < pointsArray.Length; i += 2)
+                {
+                    if (i == 0)
+                    {
+                        nums = isEmptyArea(ref nums, arcount, pointsArray[i], pointsArray[i + 1]);
+                        if (nums.Count == 0)
+                        {
+                            break;
+                        }
+                    }
+                    if (i > 0)
+                    {
+                        setTriangle(pointsArray[i], pointsArray[i + 1], ref numsListsec);
+                        if (nums.Count == 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+                numsListsec.Clear();
+                if (lineQueue.Count > 0)
+                {
+                    Triangulation(ref nums, ref lineQueue, arcount);
+                }
                 lineQueue.Clear();
             }
         }
         public List<Nums> isEmptyArea(ref List<Nums> nums, int arcount, Point SP, Point NP)
         {
-            List<Nums> newList = new List<Nums>();
-            newList = cellsBypassing(ref nums, arcount);
+            nums = cellsBypassing(ref nums, arcount);
             int pCount = 0;
-            for (int i = 0; i < newList.Count; i++)
+            for (int i = 0; i < nums.Count; i++)
             {
-                int z = areasList[newList[i].num].getListPoints().Count;
+                int z = areasList[nums[i].num].getListPoints().Count;
                 pCount += z;
-                if (pCount > 0)
-                {
-                    setTriangle(SP, NP, ref newList);
-                    break;
-                }
             }
-            if (pCount == 0 && newList.Count != 0)
+            if (pCount > 0)
             {
-                isEmptyArea(ref newList, arcount, SP, NP);
+                int f = nums.Count % 2;//проверка на четность
+                if (f > 0)//нечет
+                {
+                    for (int i = 0; i < nums.Count; i++)//порядок обхода задается здесь
+                    {
+                        numsListsec.Add(nums[i]);
+                        int a = nums.Count - i - 1;
+                        if (i == a)
+                        {
+                            break;
+                        }
+                        numsListsec.Add(nums[a]);
+                    }
+                }
+                if (f == 0)//чет
+                {
+                    int a = -1;
+                    for (int i = 0; i < nums.Count; i++)//порядок обхода задается здесь
+                    {
+                        if (i == a)
+                        {
+                            break;
+                        }
+                        numsListsec.Add(nums[i]);
+                        a = nums.Count - i - 1;
+                        numsListsec.Add(nums[a]);
+                    }
+                }
+                setTriangle(SP, NP, ref numsListsec);
             }
-            return newList;
+            if (pCount == 0 && nums.Count != 0)
+            {
+                isEmptyArea(ref nums, arcount, SP, NP);
+            }
+            return nums;
         }
 
         public double getLineLength(Point A, Point B)
@@ -315,47 +369,45 @@ namespace square_algorithm
             double dist = Math.Sqrt(xVal + yVal);
             return dist;
         }
-        public void setTriangle(Point A, Point B, ref List<Nums> nums)
+        public void setTriangle(Point A, Point B, ref List<Nums> numsListsec)
         {
             double AB = getLineLength(A, B); //c
             double finalGamma = 0;
             int a = 0, n = 0;
-            for (int i = 0; i < nums.Count; i++)
+            for (int i = 0; i < numsListsec.Count; i++)
             {
-                List<Point> newList = new List<Point>();
-                newList = areasList[nums[i].num].getListPoints();
-                
-                for (int k = 0; k < newList.Count; k++)//перебор листа поинтов num ректангла
-                {
-                    int val = Rotate(A, B, newList[k]);
-                    if (val < 0)
+                List<Point> newListPoints = new List<Point>();
+                newListPoints = areasList[numsListsec[i].num].getListPoints();
+                    for (int k = 0; k < newListPoints.Count; k++)//перебор листа поинтов num ректангла
                     {
-                        double AC = getLineLength(A, newList[k]); //b
-                        double CB = getLineLength(newList[k], B); //a
-                        double gamma = Math.Acos((CB * CB + AC * AC - AB * AB) / (2 * CB * AC)) * 180 / Math.PI;
-                        if (gamma > finalGamma)
+                        int val = Rotate(A, B, newListPoints[k]);
+                        if (val < 0)
                         {
-                            finalGamma = gamma;
-                            a = k;
-                            n = i;
+                            double AC = getLineLength(A, newListPoints[k]); //b
+                            double CB = getLineLength(newListPoints[k], B); //a
+                            double gamma = Math.Acos((CB * CB + AC * AC - AB * AB) / (2 * CB * AC)) * 180 / Math.PI;
+                            if (gamma > finalGamma)
+                            {
+                                finalGamma = gamma;
+                                a = k;
+                                n = i;
+                            }
                         }
                     }
-                }
             }
             if (finalGamma > 0)
             {
                 Graphics flagGraphics = Graphics.FromImage(bmp);
                 Pen bluePen = new Pen(Color.Blue, 1);
                 flagGraphics.DrawLine(bluePen, A.X, A.Y,
-                                                areasList[nums[n].num].points[a].X, areasList[nums[n].num].points[a].Y);
-                flagGraphics.DrawLine(bluePen, areasList[nums[n].num].points[a].X, areasList[nums[n].num].points[a].Y, B.X, B.Y);
+                                                areasList[numsListsec[n].num].points[a].X, areasList[numsListsec[n].num].points[a].Y);
+                flagGraphics.DrawLine(bluePen, areasList[numsListsec[n].num].points[a].X, areasList[numsListsec[n].num].points[a].Y, B.X, B.Y);
                 //закинем новые базовые линии в очередь
                 lineQueue.Enqueue(A);
-                lineQueue.Enqueue(areasList[nums[n].num].points[a]);
-                lineQueue.Enqueue(areasList[nums[n].num].points[a]);
+                lineQueue.Enqueue(areasList[numsListsec[n].num].points[a]);
+                lineQueue.Enqueue(areasList[numsListsec[n].num].points[a]);
                 lineQueue.Enqueue(B);
             }
-           
         }
         public List<Nums> cellsBypassing(ref List<Nums> nums, int arcount)
         {
@@ -430,6 +482,11 @@ namespace square_algorithm
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FindBaseLine();
         }
     }
 }
