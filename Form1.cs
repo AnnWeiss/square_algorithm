@@ -16,9 +16,10 @@ namespace square_algorithm
         Bitmap bmp;
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
-        List<Nums> numsList = new List<Nums>();
+        List<Nums> numsList = new List<Nums>();//лист клеток с первой базовой линией
+        List<Nums> numsByPass = new List<Nums>();//сюда будет закидываться обход клеток
         Queue lineQueue = new Queue();
-        List<Nums> numsListsec = new List<Nums>();
+        List<Pair> pairsList = new List<Pair>();
         public struct Nums
         {
             public int num { get; set; }
@@ -37,7 +38,7 @@ namespace square_algorithm
                 downRightNum = _downRightNum;
             }
 
-            public void searchForNeighbors(int areaCount, int number)
+            public void searchForNeighbors(ref int areaCount, int number)
             {
                 num = number;
                 upperNum = number - areaCount;
@@ -53,7 +54,6 @@ namespace square_algorithm
         }
         public Form1()
         {
-            //areasList = new List<Area>();
             InitializeComponent();
         }
 
@@ -188,21 +188,24 @@ namespace square_algorithm
             {
                 throw new Exception("Ошибка алгоритма");
             }
+            Point SP = new Point();
+            SP = pointsList[indexStartPoint];
+            Point NP = new Point();
+            NP = pointsList[indexNextPoint];
             Pen blackPen = new Pen(Color.Green, 1);
             using (var graphics = Graphics.FromImage(bmp))
             {
-                graphics.DrawLine(blackPen, pointsList[indexStartPoint].X, pointsList[indexStartPoint].Y,
-                                            pointsList[indexNextPoint].X, pointsList[indexNextPoint].Y);
+                graphics.DrawLine(blackPen, SP.X, SP.Y, NP.X, NP.Y);
             }
             //нужные области для базовой линии
             int areaNumberSP = -1, areaNumberNP = -1;
             for (int i = 0; i < areasList.Count; i++)
             {
-                if (areasList[i].rect.Contains(pointsList[indexStartPoint]))
+                if (areasList[i].rect.Contains(SP))
                 {
                     areaNumberSP = i;
                 }
-                if (areasList[i].rect.Contains(pointsList[indexNextPoint]))
+                if (areasList[i].rect.Contains(NP))
                 {
                     areaNumberNP = i;
                 }
@@ -250,10 +253,10 @@ namespace square_algorithm
                 for (int j = yJ1; j <= yJ2; j++)
                 {
                     int val = Matrix[i,j];
-                    one = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(0));
-                    two = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(1));
-                    three = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(2));
-                    four = Rotate(pointsList[indexStartPoint], pointsList[indexNextPoint], areasList[val].getVertice(3));
+                    one = Rotate(SP, NP, areasList[val].getVertice(0));
+                    two = Rotate(SP, NP, areasList[val].getVertice(1));
+                    three = Rotate(SP, NP, areasList[val].getVertice(2));
+                    four = Rotate(SP, NP, areasList[val].getVertice(3));
 
                     if ((one < 0 && two < 0 && three < 0 && four < 0) || (one > 0 && two > 0 && three > 0 && four > 0))
                     {
@@ -263,103 +266,88 @@ namespace square_algorithm
                     {
                         int area1 = Matrix[i, j];
                         Nums numms3 = new Nums(-1,-1, -1, -1, -1, -1);
-                        numms3.searchForNeighbors(areasCount, area1);
+                        numms3.searchForNeighbors(ref areasCount, area1);
                         numsList.Add(numms3);
                     }
                 }
-                foreach(Nums n in numsList)
+            }
+            foreach (Nums n in numsList)
+            {
+                areasList[n.num].wasVisited = true;
+            }
+            //порядок обхода вызывается здесь..
+            addCellsBypass(ref numsList, ref areasCount, ref SP, ref NP);
+            lineQueue.Enqueue(SP);
+            lineQueue.Enqueue(NP);
+            pairsList.Add(new Pair(SP, NP));
+            Triangulation(ref lineQueue, ref areasCount);
+        }
+        public void addCellsBypass(ref List<Nums> list, ref int arcount, ref Point SP, ref Point NP)
+        {
+            List<Nums> numsListsec = new List<Nums>();
+            numsListsec = cellsBypassing(ref list, ref arcount, ref SP, ref NP);//создались соседи для листа
+            //проверка на выход из зоны базовой линии, удаление лишних элементов
+            for (int i = 0; i < numsListsec.Count; i++)
+            {
+                int one = 0, two = 0, three = 0, four = 0;
+                one = Rotate(SP, NP, areasList[numsListsec[i].num].getVertice(0));
+                two = Rotate(SP, NP, areasList[numsListsec[i].num].getVertice(1));
+                three = Rotate(SP, NP, areasList[numsListsec[i].num].getVertice(2));
+                four = Rotate(SP, NP, areasList[numsListsec[i].num].getVertice(3));
+
+                if (one > 0 && two > 0 && three > 0 && four > 0)
                 {
-                    areasList[n.num].wasVisited = true;
+                    numsListsec.RemoveAt(i);
                 }
             }
-            lineQueue.Enqueue(pointsList[indexStartPoint]);
-            lineQueue.Enqueue(pointsList[indexNextPoint]);
-            Triangulation(ref numsList, ref lineQueue, areasCount);
+
+            int f = list.Count % 2;//проверка на четность
+            if (f > 0)//нечет
+            {
+                for (int i = 0; i < list.Count; i++)//порядок обхода задается здесь
+                {
+                    numsByPass.Add(list[i]);
+                    int a = list.Count - i - 1;
+                    if (i == a)
+                    {
+                        break;
+                    }
+                    numsByPass.Add(list[a]);
+                }
+            }
+            if (f == 0)//чет
+            {
+                int a = -1;
+                for (int i = 0; i < list.Count; i++)//порядок обхода задается здесь
+                {
+                    if (i == a)
+                    {
+                        break;
+                    }
+                    numsByPass.Add(list[i]);
+                    a = list.Count - i - 1;
+                    numsByPass.Add(list[a]);
+                }
+            }
+            if (numsListsec.Count != 0)
+            {
+                addCellsBypass(ref numsListsec, ref arcount, ref SP, ref NP);
+            }
         }
-        public void Triangulation(ref List<Nums> nums, ref Queue lineQueue, int arcount)
+        public void Triangulation(ref Queue lineQueue, ref int arcount)
         {
             if (lineQueue.Count >= 2)
             {
-                int a = lineQueue.Count;
-                Point[] pointsArray = new Point[a];
-                for (int i = 0; i < a; i += 2)
-                {
-                    pointsArray[i] = (Point)lineQueue.Dequeue();
-                    pointsArray[i + 1] = (Point)lineQueue.Dequeue();
-                }
-                for (int i = 0; i < pointsArray.Length; i += 2)
-                {
-                    if (i == 0)
-                    {
-                        nums = isEmptyArea(ref nums, arcount, pointsArray[i], pointsArray[i + 1]);
-                        if (nums.Count == 0)
-                        {
-                            break;
-                        }
-                    }
-                    if (i > 0)
-                    {
-                        setTriangle(pointsArray[i], pointsArray[i + 1], ref numsListsec);
-                        if (nums.Count == 0)
-                        {
-                            break;
-                        }
-                    }
-                }
-                numsListsec.Clear();
+                Point A = (Point)lineQueue.Dequeue();
+                Point B = (Point)lineQueue.Dequeue();
+                setTriangle(ref A, ref B, ref numsByPass);
                 if (lineQueue.Count > 0)
                 {
-                    Triangulation(ref nums, ref lineQueue, arcount);
+                    Triangulation(ref lineQueue, ref arcount);
                 }
-                lineQueue.Clear();
+                pairsList.Clear();
+                numsByPass.Clear();
             }
-        }
-        public List<Nums> isEmptyArea(ref List<Nums> nums, int arcount, Point SP, Point NP)
-        {
-            nums = cellsBypassing(ref nums, arcount);
-            int pCount = 0;
-            for (int i = 0; i < nums.Count; i++)
-            {
-                int z = areasList[nums[i].num].getListPoints().Count;
-                pCount += z;
-            }
-            if (pCount > 0)
-            {
-                int f = nums.Count % 2;//проверка на четность
-                if (f > 0)//нечет
-                {
-                    for (int i = 0; i < nums.Count; i++)//порядок обхода задается здесь
-                    {
-                        numsListsec.Add(nums[i]);
-                        int a = nums.Count - i - 1;
-                        if (i == a)
-                        {
-                            break;
-                        }
-                        numsListsec.Add(nums[a]);
-                    }
-                }
-                if (f == 0)//чет
-                {
-                    int a = -1;
-                    for (int i = 0; i < nums.Count; i++)//порядок обхода задается здесь
-                    {
-                        if (i == a)
-                        {
-                            break;
-                        }
-                        numsListsec.Add(nums[i]);
-                        a = nums.Count - i - 1;
-                        numsListsec.Add(nums[a]);
-                    }
-                }
-                setTriangle(SP, NP, ref numsListsec);
-            }
-            if (pCount == 0 && nums.Count != 0)
-            {
-                isEmptyArea(ref nums, arcount, SP, NP);
-            }
-            return nums;
         }
 
         public double getLineLength(Point A, Point B)
@@ -369,15 +357,15 @@ namespace square_algorithm
             double dist = Math.Sqrt(xVal + yVal);
             return dist;
         }
-        public void setTriangle(Point A, Point B, ref List<Nums> numsListsec)
+        void setTriangle(ref Point A, ref Point B, ref List<Nums> numsByPass)
         {
             double AB = getLineLength(A, B); //c
             double finalGamma = 0;
             int a = 0, n = 0;
-            for (int i = 0; i < numsListsec.Count; i++)
+            List<Point> newListPoints = new List<Point>();
+            for (int i = 0; i < numsByPass.Count; i++)
             {
-                List<Point> newListPoints = new List<Point>();
-                newListPoints = areasList[numsListsec[i].num].getListPoints();
+                newListPoints = areasList[numsByPass[i].num].getListPoints();
                     for (int k = 0; k < newListPoints.Count; k++)//перебор листа поинтов num ректангла
                     {
                         int val = Rotate(A, B, newListPoints[k]);
@@ -399,17 +387,37 @@ namespace square_algorithm
             {
                 Graphics flagGraphics = Graphics.FromImage(bmp);
                 Pen bluePen = new Pen(Color.Blue, 1);
-                flagGraphics.DrawLine(bluePen, A.X, A.Y,
-                                                areasList[numsListsec[n].num].points[a].X, areasList[numsListsec[n].num].points[a].Y);
-                flagGraphics.DrawLine(bluePen, areasList[numsListsec[n].num].points[a].X, areasList[numsListsec[n].num].points[a].Y, B.X, B.Y);
-                //закинем новые базовые линии в очередь
-                lineQueue.Enqueue(A);
-                lineQueue.Enqueue(areasList[numsListsec[n].num].points[a]);
-                lineQueue.Enqueue(areasList[numsListsec[n].num].points[a]);
-                lineQueue.Enqueue(B);
+                Pair new1 = new Pair(A, areasList[numsByPass[n].num].points[a]);
+                Pair new2 = new Pair(areasList[numsByPass[n].num].points[a], B);
+                if (!isContainLine(ref new1))
+                {
+                    flagGraphics.DrawLine(bluePen, A.X, A.Y,
+                                                areasList[numsByPass[n].num].points[a].X, areasList[numsByPass[n].num].points[a].Y);
+                    lineQueue.Enqueue(A);
+                    lineQueue.Enqueue(areasList[numsByPass[n].num].points[a]);
+                    pairsList.Add(new1);
+                }
+                if (!isContainLine(ref new2))
+                {
+                    flagGraphics.DrawLine(bluePen, areasList[numsByPass[n].num].points[a].X, areasList[numsByPass[n].num].points[a].Y, B.X, B.Y);
+                    lineQueue.Enqueue(areasList[numsByPass[n].num].points[a]);
+                    lineQueue.Enqueue(B);
+                    pairsList.Add(new2);
+                }
             }
         }
-        public List<Nums> cellsBypassing(ref List<Nums> nums, int arcount)
+        bool isContainLine(ref Pair line)
+        {
+            foreach (Pair p in pairsList)
+            {
+                if ((p.Point1 == line.Point1 && p.Point2 == line.Point2))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public List<Nums> cellsBypassing(ref List<Nums> nums, ref int arcount, ref Point A, ref Point B)
         {
             int size = arcount * arcount;
             List<Nums> numsList2 = new List<Nums>();
@@ -433,35 +441,35 @@ namespace square_algorithm
                 {
                     areasList[nums[i].upperNum].wasVisited = true;
                     Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
-                    numms3.searchForNeighbors(arcount, nums[i].upperNum);
+                    numms3.searchForNeighbors(ref arcount, nums[i].upperNum);
                     numsList2.Add(numms3);
                 }
                 if (nums[i].upperRightNum > 0 && URN > 0 && areasList[nums[i].upperRightNum].wasVisited == false)
                 {
                     areasList[nums[i].upperRightNum].wasVisited = true;
                     Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
-                    numms3.searchForNeighbors(arcount, nums[i].upperRightNum);
+                    numms3.searchForNeighbors(ref arcount, nums[i].upperRightNum);
                     numsList2.Add(numms3);
                 }
                 if (nums[i].rightNum >= 0 && RN > 0 && areasList[nums[i].rightNum].wasVisited == false)
                 {
                     areasList[nums[i].rightNum].wasVisited = true;
                     Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
-                    numms3.searchForNeighbors(arcount, nums[i].rightNum);
-                    numsList2.Add(numms3);
-                }
-                if (nums[i].downNum >= 0 && nums[i].downNum < size && areasList[nums[i].downNum].wasVisited == false)
-                {
-                    areasList[nums[i].downNum].wasVisited = true;
-                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
-                    numms3.searchForNeighbors(arcount, nums[i].downNum);
+                    numms3.searchForNeighbors(ref arcount, nums[i].rightNum);
                     numsList2.Add(numms3);
                 }
                 if (nums[i].downRightNum >= 0 && nums[i].downRightNum < size && DRN > 0 && areasList[nums[i].downRightNum].wasVisited == false)
                 {
                     areasList[nums[i].downRightNum].wasVisited = true;
                     Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
-                    numms3.searchForNeighbors(arcount, nums[i].downRightNum);
+                    numms3.searchForNeighbors(ref arcount, nums[i].downRightNum);
+                    numsList2.Add(numms3);
+                }
+                if (nums[i].downNum >= 0 && nums[i].downNum < size && areasList[nums[i].downNum].wasVisited == false)
+                {
+                    areasList[nums[i].downNum].wasVisited = true;
+                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    numms3.searchForNeighbors(ref arcount, nums[i].downNum);
                     numsList2.Add(numms3);
                 }
             }
