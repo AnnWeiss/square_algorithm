@@ -20,6 +20,7 @@ namespace square_algorithm
         List<Nums> numsByPass = new List<Nums>();//сюда будет закидываться обход клеток
         Queue lineQueue = new Queue();
         List<Pair> pairsList = new List<Pair>();
+        List<int> iterationList = new List<int>();
         public struct Nums
         {
             public int num { get; set; }
@@ -282,8 +283,10 @@ namespace square_algorithm
             pairsList.Add(new Pair(SP, NP));
             Triangulation(ref lineQueue, ref areasCount);
         }
-        public void addCellsBypass(ref List<Nums> list, ref int arcount, ref Point SP, ref Point NP)
+        public void addCellsBypass(ref List<Nums> list, ref int arcount, ref Point SP, ref Point NP)//задается нужный порядок обхода
         {
+            int countList = list.Count;//для листа int
+            iterationList.Add(countList);
             List<Nums> numsListsec = new List<Nums>();
             numsListsec = cellsBypassing(ref list, ref arcount, ref SP, ref NP);//создались соседи для листа
             //проверка на выход из зоны базовой линии, удаление лишних элементов
@@ -347,6 +350,7 @@ namespace square_algorithm
                 }
                 pairsList.Clear();
                 numsByPass.Clear();
+                iterationList.Clear();
             }
         }
 
@@ -359,29 +363,78 @@ namespace square_algorithm
         }
         void setTriangle(ref Point A, ref Point B, ref List<Nums> numsByPass)
         {
+            int save = 0;
+            for (int f = 0; f < iterationList.Count; f++)
+            {
+                int iterListIndex = iterationList[f];
+                bool j = First(ref A, ref B, ref numsByPass, ref save, ref iterListIndex);
+                if (j)
+                {
+                    break;
+                }
+            }
+        }
+        public bool First(ref Point A, ref Point B, ref List<Nums> numsByPass, ref int save, ref int iterListIndex)
+        {
+            while (iterListIndex > 0)
+            {
+                iterListIndex -= 2;
+                if (iterListIndex > 0)
+                {
+                    //рассмотреть 2 клетки
+                    bool g = Second(ref A, ref B, ref numsByPass, 2, ref save);
+                    if (g)
+                    {
+                        return true;
+                    }
+                }
+                if (iterListIndex == 0)
+                {
+                    //рассмотреть 2 клетки и выйти на след. итерацию for
+                    bool g = Second(ref A, ref B, ref numsByPass, 2, ref save);
+                    if (g)
+                    {
+                        return true;
+                    }
+                }
+                if (iterListIndex == -1)
+                {
+                    //рассмотреть 1 клетку и выйти на след. итерацию for
+                    bool g = Second(ref A, ref B, ref numsByPass, 1, ref save);
+                    if (g)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public bool Second(ref Point A, ref Point B, ref List<Nums> numsByPass, int value, ref int save)
+        {
             double AB = getLineLength(A, B); //c
             double finalGamma = 0;
             int a = 0, n = 0;
             List<Point> newListPoints = new List<Point>();
-            for (int i = 0; i < numsByPass.Count; i++)
+            for (int i = 0; i < value; i++)
             {
-                newListPoints = areasList[numsByPass[i].num].getListPoints();
-                    for (int k = 0; k < newListPoints.Count; k++)//перебор листа поинтов num ректангла
+                newListPoints = areasList[numsByPass[save].num].getListPoints();
+                for (int k = 0; k < newListPoints.Count; k++)//перебор листа поинтов num ректангла
+                {
+                    int val = Rotate(A, B, newListPoints[k]);
+                    if (val < 0)
                     {
-                        int val = Rotate(A, B, newListPoints[k]);
-                        if (val < 0)
+                        double AC = getLineLength(A, newListPoints[k]); //b
+                        double CB = getLineLength(newListPoints[k], B); //a
+                        double gamma = Math.Acos((CB * CB + AC * AC - AB * AB) / (2 * CB * AC)) * 180 / Math.PI;
+                        if (gamma > finalGamma)
                         {
-                            double AC = getLineLength(A, newListPoints[k]); //b
-                            double CB = getLineLength(newListPoints[k], B); //a
-                            double gamma = Math.Acos((CB * CB + AC * AC - AB * AB) / (2 * CB * AC)) * 180 / Math.PI;
-                            if (gamma > finalGamma)
-                            {
-                                finalGamma = gamma;
-                                a = k;
-                                n = i;
-                            }
+                            finalGamma = gamma;
+                            a = k;
+                            n = save;
                         }
                     }
+                }
+                save++;
             }
             if (finalGamma > 0)
             {
@@ -404,7 +457,9 @@ namespace square_algorithm
                     lineQueue.Enqueue(B);
                     pairsList.Add(new2);
                 }
+                return true;
             }
+            return false;
         }
         bool isContainLine(ref Pair line)
         {
