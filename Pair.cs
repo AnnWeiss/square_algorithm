@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace square_algorithm
 {
-    class Pair
+    public class Pair
     {
         public Point Point1 { get; set; }
         public Point Point2 { get; set; }

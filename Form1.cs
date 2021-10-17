@@ -16,11 +16,10 @@ namespace square_algorithm
         Bitmap bmp;
         List<Area> areasList = new List<Area>();
         List<Point> pointsList = new List<Point>();
-        List<Nums> numsList = new List<Nums>();//лист клеток с первой базовой линией
         List<Nums> numsByPass = new List<Nums>();//сюда будет закидываться обход клеток
-        Queue lineQueue = new Queue();
+        Queue<Point> lineQueue = new Queue<Point>();
         List<Pair> pairsList = new List<Pair>();
-        List<int> iterationList = new List<int>();
+        HashSet<Point> allreadyAddedPoints = new HashSet<Point>();
         public struct Nums
         {
             public int num { get; set; }
@@ -29,15 +28,6 @@ namespace square_algorithm
             public int rightNum { get; set; }
             public int downNum { get; set; }
             public int downRightNum { get; set; }
-            public Nums(int _num, int _upperNum, int _upperRightNum, int _rightNum, int _downNum, int _downRightNum)
-            {
-                num = _num;
-                upperNum = _upperNum;
-                upperRightNum = _upperRightNum;
-                rightNum = _rightNum;
-                downNum = _downNum;
-                downRightNum = _downRightNum;
-            }
 
             public void searchForNeighbors(ref int areaCount, int number)
             {
@@ -69,7 +59,7 @@ namespace square_algorithm
             int areasCount = Convert.ToInt32(textBox1.Text);
             if (areasCount < 2 || areasCount > 10)
             {
-                throw new Exception("Введите число от 2 до 10");
+                MessageBox.Show("Введите число от 2 до 10");
             }
             mainPictureBox.Size = new Size(areasize*areasCount, areasize * areasCount);
             bmp = new Bitmap(mainPictureBox.Size.Width, mainPictureBox.Size.Height);
@@ -77,7 +67,6 @@ namespace square_algorithm
             flagGraphics.FillRectangle(Brushes.White, 0, 0, bmp.Width, bmp.Height);
             mainPictureBox.Image = bmp;
             mainPictureBox.Invalidate();
-            
         }
 
         public void GenerateAreas()
@@ -93,7 +82,6 @@ namespace square_algorithm
                     areasList.Add(new Area(new Rectangle(j, i, w, h)));
                 }
             }
-            DrawAreas();
         }
         public void DrawAreas()
         {
@@ -103,7 +91,6 @@ namespace square_algorithm
             {
                 flagGraphics.DrawRectangle(blackPen, a.rect);
             }
-            GeneratePoints();
         }
 
         public void GeneratePoints()
@@ -114,7 +101,7 @@ namespace square_algorithm
             int pointsCount = Convert.ToInt32(textBox2.Text);
             if (pointsCount < 2 || pointsCount > 10000)
             {
-                throw new Exception("Введите число от 2 до 10000");
+                MessageBox.Show("Введите число от 2 до 10000");
             }
             int pointsIterator = 0;
             pointsList.Clear();
@@ -125,7 +112,6 @@ namespace square_algorithm
                 pointsList.Add(new Point(x, y));
                 pointsIterator++;
             }
-            DrawRandomPoints();
         }
 
         public void DrawRandomPoints()
@@ -135,7 +121,6 @@ namespace square_algorithm
             {
                 flagGraphics.FillEllipse(Brushes.Red, p.X-2, p.Y-2, 4, 4);
             }
-            PointBelongs();
         }
 
         public void PointBelongs()
@@ -160,14 +145,13 @@ namespace square_algorithm
                 areasList[k].vertices.Add(new Point(areasList[k].rect.X, areasList[k].rect.Y+h));
                 areasList[k].vertices.Add(new Point(areasList[k].rect.X+w, areasList[k].rect.Y+h));
             }
-            FindBaseLine();
         }
 
         public void FindBaseLine()
         {
             if (pointsList.Count < 2)
             {
-                throw new Exception("Точек меньше двух!");
+                MessageBox.Show("Точек меньше двух!");
             }
             int indexStartPoint = 0;
             for (int i = 0; i < pointsList.Count; i++)
@@ -185,19 +169,14 @@ namespace square_algorithm
                     indexNextPoint = i;
                 }
             }
-            if (indexNextPoint==indexStartPoint)
+            if (indexNextPoint == indexStartPoint)
             {
-                throw new Exception("Ошибка алгоритма");
+                MessageBox.Show("Ошибка алгоритма");
             }
             Point SP = new Point();
             SP = pointsList[indexStartPoint];
             Point NP = new Point();
             NP = pointsList[indexNextPoint];
-            Pen blackPen = new Pen(Color.Green, 1);
-            using (var graphics = Graphics.FromImage(bmp))
-            {
-                graphics.DrawLine(blackPen, SP.X, SP.Y, NP.X, NP.Y);
-            }
             //нужные области для базовой линии
             int areaNumberSP = -1, areaNumberNP = -1;
             for (int i = 0; i < areasList.Count; i++)
@@ -211,8 +190,6 @@ namespace square_algorithm
                     areaNumberNP = i;
                 }
             }
-            //для линии соседи
-            numsList.Clear();
             //вершины областей iSP iNP
             int areasCount = Convert.ToInt32(textBox1.Text);
             int xI1 = -1, yJ1 = -1, xI2=-1, yJ2=-1;
@@ -222,7 +199,7 @@ namespace square_algorithm
             {
                 for (int j = 0; j < areasCount; j++)
                 {
-                    Matrix[i, j] = k++; //заполняю матрицу
+                    Matrix[i, j] = k++;
                     if (Matrix[i, j] == areaNumberSP)
                     {
                         xI1 = i;
@@ -248,6 +225,8 @@ namespace square_algorithm
                 yJ1 = yJ1 - yJ2;
             }
             //рассматриваем в диапазоне
+            List<Nums> numsList = new List<Nums>();//лист клеток с первой базовой линией
+            numsList.Clear();
             for (int i = xI1; i <= xI2; i++)
             {
                 int one = 0, two = 0, three = 0, four = 0;
@@ -266,7 +245,7 @@ namespace square_algorithm
                     else
                     {
                         int area1 = Matrix[i, j];
-                        Nums numms3 = new Nums(-1,-1, -1, -1, -1, -1);
+                        Nums numms3 = new Nums();
                         numms3.searchForNeighbors(ref areasCount, area1);
                         numsList.Add(numms3);
                     }
@@ -280,13 +259,13 @@ namespace square_algorithm
             addCellsBypass(ref numsList, ref areasCount, ref SP, ref NP);
             lineQueue.Enqueue(SP);
             lineQueue.Enqueue(NP);
+            allreadyAddedPoints.Add(SP);
+            allreadyAddedPoints.Add(NP);
             pairsList.Add(new Pair(SP, NP));
             Triangulation(ref lineQueue, ref areasCount);
         }
-        public void addCellsBypass(ref List<Nums> list, ref int arcount, ref Point SP, ref Point NP)//задается нужный порядок обхода
+        public void addCellsBypass(ref List<Nums> list, ref int arcount, ref Point SP, ref Point NP)//задается нужный порядок обхода от базовой линии
         {
-            int countList = list.Count;//для листа int
-            iterationList.Add(countList);
             List<Nums> numsListsec = new List<Nums>();
             numsListsec = cellsBypassing(ref list, ref arcount, ref SP, ref NP);//создались соседи для листа
             //проверка на выход из зоны базовой линии, удаление лишних элементов
@@ -337,7 +316,7 @@ namespace square_algorithm
                 addCellsBypass(ref numsListsec, ref arcount, ref SP, ref NP);
             }
         }
-        public void Triangulation(ref Queue lineQueue, ref int arcount)
+        public void Triangulation(ref Queue<Point> lineQueue, ref int arcount)
         {
             if (lineQueue.Count >= 2)
             {
@@ -348,9 +327,7 @@ namespace square_algorithm
                 {
                     Triangulation(ref lineQueue, ref arcount);
                 }
-                pairsList.Clear();
                 numsByPass.Clear();
-                iterationList.Clear();
             }
         }
 
@@ -363,61 +340,13 @@ namespace square_algorithm
         }
         void setTriangle(ref Point A, ref Point B, ref List<Nums> numsByPass)
         {
-            int save = 0;
-            for (int f = 0; f < iterationList.Count; f++)
-            {
-                int iterListIndex = iterationList[f];
-                bool j = First(ref A, ref B, ref numsByPass, ref save, ref iterListIndex);
-                if (j)
-                {
-                    break;
-                }
-            }
-        }
-        public bool First(ref Point A, ref Point B, ref List<Nums> numsByPass, ref int save, ref int iterListIndex)
-        {
-            while (iterListIndex > 0)
-            {
-                iterListIndex -= 2;
-                if (iterListIndex > 0)
-                {
-                    //рассмотреть 2 клетки
-                    bool g = Second(ref A, ref B, ref numsByPass, 2, ref save);
-                    if (g)
-                    {
-                        return true;
-                    }
-                }
-                if (iterListIndex == 0)
-                {
-                    //рассмотреть 2 клетки и выйти на след. итерацию for
-                    bool g = Second(ref A, ref B, ref numsByPass, 2, ref save);
-                    if (g)
-                    {
-                        return true;
-                    }
-                }
-                if (iterListIndex == -1)
-                {
-                    //рассмотреть 1 клетку и выйти на след. итерацию for
-                    bool g = Second(ref A, ref B, ref numsByPass, 1, ref save);
-                    if (g)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-        public bool Second(ref Point A, ref Point B, ref List<Nums> numsByPass, int value, ref int save)
-        {
             double AB = getLineLength(A, B); //c
             double finalGamma = 0;
             int a = 0, n = 0;
             List<Point> newListPoints = new List<Point>();
-            for (int i = 0; i < value; i++)
+            for (int i = 0; i < numsByPass.Count; i++)
             {
-                newListPoints = areasList[numsByPass[save].num].getListPoints();
+                newListPoints = areasList[numsByPass[i].num].getListPoints();
                 for (int k = 0; k < newListPoints.Count; k++)//перебор листа поинтов num ректангла
                 {
                     int val = Rotate(A, B, newListPoints[k]);
@@ -430,36 +359,38 @@ namespace square_algorithm
                         {
                             finalGamma = gamma;
                             a = k;
-                            n = save;
+                            n = i;
                         }
                     }
                 }
-                save++;
             }
             if (finalGamma > 0)
             {
-                Graphics flagGraphics = Graphics.FromImage(bmp);
-                Pen bluePen = new Pen(Color.Blue, 1);
                 Pair new1 = new Pair(A, areasList[numsByPass[n].num].points[a]);
                 Pair new2 = new Pair(areasList[numsByPass[n].num].points[a], B);
                 if (!isContainLine(ref new1))
                 {
-                    flagGraphics.DrawLine(bluePen, A.X, A.Y,
-                                                areasList[numsByPass[n].num].points[a].X, areasList[numsByPass[n].num].points[a].Y);
                     lineQueue.Enqueue(A);
                     lineQueue.Enqueue(areasList[numsByPass[n].num].points[a]);
                     pairsList.Add(new1);
                 }
                 if (!isContainLine(ref new2))
                 {
-                    flagGraphics.DrawLine(bluePen, areasList[numsByPass[n].num].points[a].X, areasList[numsByPass[n].num].points[a].Y, B.X, B.Y);
                     lineQueue.Enqueue(areasList[numsByPass[n].num].points[a]);
                     lineQueue.Enqueue(B);
                     pairsList.Add(new2);
                 }
-                return true;
             }
-            return false;
+        }
+        public void drawLine(ref List<Pair> pairsList)
+        {
+            Graphics flagGraphics = Graphics.FromImage(bmp);
+            Pen bluePen = new Pen(Color.Blue, 1);
+            foreach (Pair p in pairsList)
+            {
+                flagGraphics.DrawLine(bluePen, p.Point1, p.Point2);
+            }
+            pairsList.Clear();
         }
         bool isContainLine(ref Pair line)
         {
@@ -472,7 +403,7 @@ namespace square_algorithm
             }
             return false;
         }
-        public List<Nums> cellsBypassing(ref List<Nums> nums, ref int arcount, ref Point A, ref Point B)
+        public List<Nums> cellsBypassing(ref List<Nums> nums, ref int arcount, ref Point A, ref Point B)//огибающая
         {
             int size = arcount * arcount;
             List<Nums> numsList2 = new List<Nums>();
@@ -495,35 +426,35 @@ namespace square_algorithm
                 if ( nums[i].upperNum >= 0 && areasList[nums[i].upperNum].wasVisited == false)
                 {
                     areasList[nums[i].upperNum].wasVisited = true;
-                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    Nums numms3 = new Nums();
                     numms3.searchForNeighbors(ref arcount, nums[i].upperNum);
                     numsList2.Add(numms3);
                 }
                 if (nums[i].upperRightNum > 0 && URN > 0 && areasList[nums[i].upperRightNum].wasVisited == false)
                 {
                     areasList[nums[i].upperRightNum].wasVisited = true;
-                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    Nums numms3 = new Nums();
                     numms3.searchForNeighbors(ref arcount, nums[i].upperRightNum);
                     numsList2.Add(numms3);
                 }
                 if (nums[i].rightNum >= 0 && RN > 0 && areasList[nums[i].rightNum].wasVisited == false)
                 {
                     areasList[nums[i].rightNum].wasVisited = true;
-                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    Nums numms3 = new Nums();
                     numms3.searchForNeighbors(ref arcount, nums[i].rightNum);
                     numsList2.Add(numms3);
                 }
                 if (nums[i].downRightNum >= 0 && nums[i].downRightNum < size && DRN > 0 && areasList[nums[i].downRightNum].wasVisited == false)
                 {
                     areasList[nums[i].downRightNum].wasVisited = true;
-                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    Nums numms3 = new Nums();
                     numms3.searchForNeighbors(ref arcount, nums[i].downRightNum);
                     numsList2.Add(numms3);
                 }
                 if (nums[i].downNum >= 0 && nums[i].downNum < size && areasList[nums[i].downNum].wasVisited == false)
                 {
                     areasList[nums[i].downNum].wasVisited = true;
-                    Nums numms3 = new Nums(-1, -1, -1, -1, -1, -1);
+                    Nums numms3 = new Nums();
                     numms3.searchForNeighbors(ref arcount, nums[i].downNum);
                     numsList2.Add(numms3);
                 }
@@ -535,6 +466,13 @@ namespace square_algorithm
         {
             CreateBitmapAtRuntime();
             GenerateAreas();
+            DrawAreas();
+            GeneratePoints();
+            DrawRandomPoints();
+            PointBelongs();
+            FindBaseLine();
+            drawLine(ref pairsList);
+            allreadyAddedPoints.Clear();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
