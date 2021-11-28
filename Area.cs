@@ -19,7 +19,6 @@ namespace square_algorithm
             rect = _rect;
             points = new List<Point>();
             vertices = new List<Point>();
-            wasVisited = false;
         }
         public Point getVertice(int value)
         {
