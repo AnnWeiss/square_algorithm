@@ -19,111 +19,166 @@ namespace square_algorithm
         List<int> areasByPass = new List<int>();//сюда будет закидываться обход клеток
         Queue<Point> lineQueue = new Queue<Point>();
         List<Pair> pairsList = new List<Pair>();
-        HashSet<Point> allreadyAddedPoints = new HashSet<Point>();
         HashSet<int> alreadyAddedAreas = new HashSet<int>();
         public class Nums
         {
             public int mainNum;
             public List<int> numsList = new List<int>();
-            public int sizeOfArea; //areasCount*areasCount
+            static public int sizeOfArea; //areasCount*areasCount
             public Nums(int size)
             {
                 sizeOfArea = size;
             }
-            public void RightLeft(int areaCount, int number, int one)
+            public void setSquareFirst(int areaCount, int number)
             {
                 mainNum = number;
-                int up = number - areaCount;
-                int down = number + areaCount;
-                int side = number + one;
-                var isOneRow = side / areaCount == number / areaCount;
-                if (up >= 0)
+                int down = number - areaCount;
+                int up = number + areaCount;
+                int sideRight = number + 1;
+                int sideLeft = number - 1;
+                var isOneRowRight = sideRight / areaCount == number / areaCount;
+                var isOneRowLeft = sideLeft / areaCount == number / areaCount;
+                if (isOneRowRight && down >= 0)
                 {
-                    numsList.Add(up);
+                    numsList.Add(down + 1);
                 }
-                if (isOneRow && up >= 0)
-                {
-                    numsList.Add(up + one);
-                }
-                if (isOneRow)
-                {
-                    numsList.Add(side);
-                }
-                if (isOneRow && down < sizeOfArea)
-                {
-                    numsList.Add(down + one);
-                }
-                if (down < sizeOfArea)
+                if (down >= 0)
                 {
                     numsList.Add(down);
                 }
-            }
-            public void UpDown(int areaCount, int number)
-            {
-                mainNum = number;
-                int value = number + areaCount;//up or down
-                int sideLeft = number - 1;
-                var isOneRowLeft = sideLeft / areaCount == number / areaCount;
-                int sideRight = number + 1;
-                var isOneRowRight = sideRight / areaCount == number / areaCount;
-                
+                if (isOneRowLeft && down >= 0)
+                {
+                    numsList.Add(down - 1);
+                }
                 if (isOneRowLeft)
                 {
                     numsList.Add(sideLeft);
                 }
-                if (isOneRowLeft && value >= 0 && value < sizeOfArea)
+                if (isOneRowLeft && up < sizeOfArea)
                 {
-                    numsList.Add(value - 1);
+                    numsList.Add(up - 1);
                 }
-                if (value >= 0 && value < sizeOfArea)
+                if (up < sizeOfArea)
                 {
-                    numsList.Add(value);
-                }
-                if (isOneRowRight && value >= 0 && value < sizeOfArea)
-                {
-                    numsList.Add(value + 1);
+                    numsList.Add(up);
                 }
                 if (isOneRowRight)
                 {
                     numsList.Add(sideRight);
                 }
             }
-            public void UpRightLeft(int areaCount, int number,int one)
+            public void setSquareFourth(int areaCount, int number)
             {
                 mainNum = number;
+                int down = number - areaCount;
                 int up = number + areaCount;
-                int side = number + one;
-                var isOneRow = side / areaCount == number / areaCount;
-                if (isOneRow)
+                int sideRight = number + 1;
+                int sideLeft = number - 1;
+                var isOneRowRight = sideRight / areaCount == number / areaCount;
+                var isOneRowLeft = sideLeft / areaCount == number / areaCount;
+                if (isOneRowLeft && down >= 0)
                 {
-                    numsList.Add(side);
+                    numsList.Add(down - 1);
                 }
-                if (isOneRow && up < sizeOfArea)
+                if (isOneRowLeft)
                 {
-                    numsList.Add(up + one);
+                    numsList.Add(sideLeft);
+                }
+                if (isOneRowLeft && up < sizeOfArea)
+                {
+                    numsList.Add(up - 1);
                 }
                 if (up < sizeOfArea)
                 {
                     numsList.Add(up);
                 }
-            }
-            public void DownRightLeft(int areaCount, int number,int one)
-            {
-                mainNum = number;
-                int down = number - areaCount;
-                int side = number + one;
-                var isOneRow = side / areaCount == number / areaCount;
+                if (isOneRowRight)
+                {
+                    numsList.Add(sideRight);
+                }
+                if (isOneRowRight && down >= 0)
+                {
+                    numsList.Add(down + 1);
+                }
                 if (down >= 0)
                 {
                     numsList.Add(down);
                 }
-                if (isOneRow && down >= 0)
+            }
+            public void setSquareThird(int areaCount, int number)
+            {
+                mainNum = number;
+                int down = number - areaCount;
+                int up = number + areaCount;
+                int sideRight = number + 1;
+                int sideLeft = number - 1;
+                var isOneRowRight = sideRight / areaCount == number / areaCount;
+                var isOneRowLeft = sideLeft / areaCount == number / areaCount;
+                if (isOneRowLeft && up < sizeOfArea)
                 {
-                    numsList.Add(down + one);
+                    numsList.Add(up - 1);
                 }
-                if (isOneRow)
+                if (up < sizeOfArea)
                 {
-                    numsList.Add(side);
+                    numsList.Add(up);
+                }
+                if (isOneRowRight)
+                {
+                    numsList.Add(sideRight);
+                }
+                if (isOneRowRight && down >= 0)
+                {
+                    numsList.Add(down + 1);
+                }
+                if (down >= 0)
+                {
+                    numsList.Add(down);
+                }
+                if (isOneRowLeft && down >= 0)
+                {
+                    numsList.Add(down - 1);
+                }
+                if (isOneRowLeft)
+                {
+                    numsList.Add(sideLeft);
+                }
+            }
+            public void setSquareSecond(int areaCount, int number)
+            {
+                mainNum = number;
+                int down = number - areaCount;
+                int up = number + areaCount;
+                int sideRight = number + 1;
+                int sideLeft = number - 1;
+                var isOneRowRight = sideRight / areaCount == number / areaCount;
+                var isOneRowLeft = sideLeft / areaCount == number / areaCount;
+                if (isOneRowRight)
+                {
+                    numsList.Add(sideRight);
+                }
+                if (isOneRowRight && down >= 0)
+                {
+                    numsList.Add(down + 1);
+                }
+                if (down >= 0)
+                {
+                    numsList.Add(down);
+                }
+                if (isOneRowLeft && down >= 0)
+                {
+                    numsList.Add(down - 1);
+                }
+                if (isOneRowLeft)
+                {
+                    numsList.Add(sideLeft);
+                }
+                if (isOneRowLeft && up < sizeOfArea)
+                {
+                    numsList.Add(up - 1);
+                }
+                if (up < sizeOfArea)
+                {
+                    numsList.Add(up);
                 }
             }
         }
@@ -266,12 +321,8 @@ namespace square_algorithm
             Point NP = new Point();
             NP = pointsList[indexNextPoint];
             int areasCount = Convert.ToInt32(textBox1.Text);
-            List<Nums> numsList = new List<Nums>();
-            numsList = getNumsByBaseLine(SP, NP);
             lineQueue.Enqueue(SP);
             lineQueue.Enqueue(NP);
-            allreadyAddedPoints.Add(SP);
-            allreadyAddedPoints.Add(NP);
             pairsList.Add(new Pair(SP, NP));
             Triangulation(ref lineQueue, areasCount);
         }
@@ -326,7 +377,7 @@ namespace square_algorithm
             }
 
             Point NVector = new Point();
-            NVector = getNormalVector(SP, NP); //вектор нормали к базовой линии
+            NVector = getAntiNormalVector(SP, NP); //вектор нормали к базовой линии
 
             for (int i = xI1; i <= xI2; i++)//рассматриваем в диапазоне, пропускаем клетки, через которые прямая не проходит
             {
@@ -363,50 +414,50 @@ namespace square_algorithm
             {
                 if (NVector.X > 0 && NVector.Y > 0) //вправо вверх
                 {
-                    nums.UpRightLeft(areasCount, area, 1);
+                    nums.setSquareSecond(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X > 0 && NVector.Y < 0) //вправо вниз
                 {
-                    nums.DownRightLeft(areasCount, area, 1);
+                    nums.setSquareFirst(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X < 0 && NVector.Y < 0) //влево вниз
                 {
-                    nums.DownRightLeft(areasCount, area, -1);
+                    nums.setSquareFourth(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X < 0 && NVector.Y > 0) //влево вверх
                 {
-                    nums.UpRightLeft(areasCount, area, -1);
+                    nums.setSquareThird(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X == 0 && NVector.Y < 0) //вниз
                 {
-                    nums.UpDown(-areasCount, area);
+                    nums.setSquareFirst(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X == 0 && NVector.Y > 0) //вверх
                 {
-                    nums.UpDown(areasCount, area);
+                    nums.setSquareThird(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X > 0 && NVector.Y == 0) //вправо
                 {
-                    nums.RightLeft(areasCount, area, 1);
+                    nums.setSquareSecond(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X < 0 && NVector.Y == 0) //влево
                 {
-                    nums.RightLeft(areasCount, area, -1);
+                    nums.setSquareFourth(areasCount, area);
                     numsList.Add(nums);
                 }
             }
         }
-        public Point getNormalVector(Point sp, Point np)
+        public Point getAntiNormalVector(Point sp, Point np)
         {
             np.X = np.X - sp.X; np.Y = np.Y - sp.Y;//конец минус начало
-            int a = np.Y; int b = -np.X;
+            int a = -np.Y; int b = np.X;
             np.X = a; np.Y = b;
             return np;//возврат координат конца вектора, повернутые на 90 градусов во внеш.сторону
         }
@@ -486,7 +537,7 @@ namespace square_algorithm
                 Point A = lineQueue.Dequeue();
                 Point B = lineQueue.Dequeue();
                 Point NVector = new Point();
-                NVector = getNormalVector(A, B);
+                NVector = getAntiNormalVector(A, B);
                 List<Nums> numsList = new List<Nums>();
                 numsList = getNumsByBaseLine(A, B);//вызов поиска областей для базовой линии
                 addCellsBypass(ref numsList, areasCount, A, B, NVector);//порядок обхода вызывается здесь..
@@ -500,7 +551,6 @@ namespace square_algorithm
                 else
                 {
                     areasByPass.Clear();
-                    allreadyAddedPoints.Clear();
                     alreadyAddedAreas.Clear();
                 }
             }
@@ -541,23 +591,19 @@ namespace square_algorithm
             }
             if (finalGamma > 0)
             {
-                if (!allreadyAddedPoints.Contains(areasList[numsByPass[n]].points[a]))
+                Pair new1 = new Pair(A, areasList[numsByPass[n]].points[a]);
+                Pair new2 = new Pair(areasList[numsByPass[n]].points[a], B);
+                if (!isContainLine(ref new1))
                 {
-                    allreadyAddedPoints.Add(areasList[numsByPass[n]].points[a]);
-                    Pair new1 = new Pair(A, areasList[numsByPass[n]].points[a]);
-                    Pair new2 = new Pair(areasList[numsByPass[n]].points[a], B);
-                    if (!isContainLine(ref new1))
-                    {
-                        lineQueue.Enqueue(A);
-                        lineQueue.Enqueue(areasList[numsByPass[n]].points[a]);
-                        pairsList.Add(new1);
-                    }
-                    if (!isContainLine(ref new2))
-                    {
-                        lineQueue.Enqueue(areasList[numsByPass[n]].points[a]);
-                        lineQueue.Enqueue(B);
-                        pairsList.Add(new2);
-                    }
+                    lineQueue.Enqueue(A);
+                    lineQueue.Enqueue(areasList[numsByPass[n]].points[a]);
+                    pairsList.Add(new1);
+                }
+                if (!isContainLine(ref new2))
+                {
+                     lineQueue.Enqueue(areasList[numsByPass[n]].points[a]);
+                     lineQueue.Enqueue(B);
+                     pairsList.Add(new2);
                 }
             }
         }
