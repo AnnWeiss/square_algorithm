@@ -29,7 +29,7 @@ namespace square_algorithm
             {
                 sizeOfArea = size;
             }
-            public void setSquareFirst(int areaCount, int number)
+            public void setSquare_Down_Or_RightDown(int areaCount, int number)
             {
                 mainNum = number;
                 int down = number - areaCount;
@@ -42,70 +42,36 @@ namespace square_algorithm
                 {
                     numsList.Add(down + 1);
                 }
-                if (down >= 0)
+                if (isOneRowRight)
                 {
-                    numsList.Add(down);
+                    numsList.Add(sideRight);
                 }
-                if (isOneRowLeft && down >= 0)
+                if (isOneRowRight && up < sizeOfArea)
                 {
-                    numsList.Add(down - 1);
-                }
-                if (isOneRowLeft)
-                {
-                    numsList.Add(sideLeft);
-                }
-                if (isOneRowLeft && up < sizeOfArea)
-                {
-                    numsList.Add(up - 1);
+                    numsList.Add(up + 1);
                 }
                 if (up < sizeOfArea)
                 {
                     numsList.Add(up);
                 }
-                if (isOneRowRight)
-                {
-                    numsList.Add(sideRight);
-                }
-            }
-            public void setSquareFourth(int areaCount, int number)
-            {
-                mainNum = number;
-                int down = number - areaCount;
-                int up = number + areaCount;
-                int sideRight = number + 1;
-                int sideLeft = number - 1;
-                var isOneRowRight = sideRight / areaCount == number / areaCount;
-                var isOneRowLeft = sideLeft / areaCount == number / areaCount;
-                if (isOneRowLeft && down >= 0)
-                {
-                    numsList.Add(down - 1);
-                }
-                if (isOneRowLeft)
-                {
-                    numsList.Add(sideLeft);
-                }
-                if (isOneRowLeft && up < sizeOfArea)
+                if (isOneRowLeft && up < sizeOfArea && sideLeft >= 0)
                 {
                     numsList.Add(up - 1);
                 }
-                if (up < sizeOfArea)
+                if (isOneRowLeft && sideLeft >= 0)
                 {
-                    numsList.Add(up);
+                    numsList.Add(sideLeft);
                 }
-                if (isOneRowRight)
+                if (isOneRowLeft && down >= 0)
                 {
-                    numsList.Add(sideRight);
-                }
-                if (isOneRowRight && down >= 0)
-                {
-                    numsList.Add(down + 1);
+                    numsList.Add(down - 1);
                 }
                 if (down >= 0)
                 {
                     numsList.Add(down);
                 }
             }
-            public void setSquareThird(int areaCount, int number)
+            public void setSquare_Left_Or_LeftDown(int areaCount, int number)
             {
                 mainNum = number;
                 int down = number - areaCount;
@@ -114,36 +80,40 @@ namespace square_algorithm
                 int sideLeft = number - 1;
                 var isOneRowRight = sideRight / areaCount == number / areaCount;
                 var isOneRowLeft = sideLeft / areaCount == number / areaCount;
-                if (isOneRowLeft && up < sizeOfArea)
+                if (isOneRowLeft && down >= 0)
                 {
-                    numsList.Add(up - 1);
-                }
-                if (up < sizeOfArea)
-                {
-                    numsList.Add(up);
-                }
-                if (isOneRowRight)
-                {
-                    numsList.Add(sideRight);
-                }
-                if (isOneRowRight && down >= 0)
-                {
-                    numsList.Add(down + 1);
+                    numsList.Add(down - 1);
                 }
                 if (down >= 0)
                 {
                     numsList.Add(down);
                 }
-                if (isOneRowLeft && down >= 0)
+                if (isOneRowRight && down >= 0)
                 {
-                    numsList.Add(down - 1);
+                    numsList.Add(down + 1);
                 }
-                if (isOneRowLeft)
+                if (isOneRowRight)
+                {
+                    numsList.Add(sideRight);
+                }
+                if (isOneRowRight && up < sizeOfArea)
+                {
+                    numsList.Add(up + 1);
+                }
+                if (up < sizeOfArea)
+                {
+                    numsList.Add(up);
+                }
+                if (isOneRowLeft && up < sizeOfArea && sideLeft >= 0)
+                {
+                    numsList.Add(up - 1);
+                }
+                if (isOneRowLeft && sideLeft >= 0)
                 {
                     numsList.Add(sideLeft);
                 }
             }
-            public void setSquareSecond(int areaCount, int number)
+            public void setSquare_Up_Or_UpLeft(int areaCount, int number)
             {
                 mainNum = number;
                 int down = number - areaCount;
@@ -152,33 +122,79 @@ namespace square_algorithm
                 int sideLeft = number - 1;
                 var isOneRowRight = sideRight / areaCount == number / areaCount;
                 var isOneRowLeft = sideLeft / areaCount == number / areaCount;
-                if (isOneRowRight)
+                if (isOneRowLeft && up < sizeOfArea && sideLeft >= 0)
                 {
-                    numsList.Add(sideRight);
+                    numsList.Add(up - 1);
                 }
-                if (isOneRowRight && down >= 0)
+                if (isOneRowLeft && sideLeft >= 0)
                 {
-                    numsList.Add(down + 1);
-                }
-                if (down >= 0)
-                {
-                    numsList.Add(down);
+                    numsList.Add(sideLeft);
                 }
                 if (isOneRowLeft && down >= 0)
                 {
                     numsList.Add(down - 1);
                 }
-                if (isOneRowLeft)
+                if (down >= 0)
                 {
-                    numsList.Add(sideLeft);
+                    numsList.Add(down);
                 }
-                if (isOneRowLeft && up < sizeOfArea)
+                if (isOneRowRight && down >= 0)
                 {
-                    numsList.Add(up - 1);
+                    numsList.Add(down + 1);
+                }
+                if (isOneRowRight)
+                {
+                    numsList.Add(sideRight);
+                }
+                if (isOneRowRight && up < sizeOfArea)
+                {
+                    numsList.Add(up + 1);
                 }
                 if (up < sizeOfArea)
                 {
                     numsList.Add(up);
+                }
+            }
+            public void setSquare_Right_Or_RightUp(int areaCount, int number)
+            {
+                mainNum = number;
+                int down = number - areaCount;
+                int up = number + areaCount;
+                int sideRight = number + 1;
+                int sideLeft = number - 1;
+                var isOneRowRight = sideRight / areaCount == number / areaCount;
+                var isOneRowLeft = sideLeft / areaCount == number / areaCount;
+                if (isOneRowRight && up < sizeOfArea)
+                {
+                    numsList.Add(up + 1);
+                }
+                if (up < sizeOfArea)
+                {
+                    numsList.Add(up);
+                }
+                if (isOneRowLeft && up < sizeOfArea && sideLeft >= 0)
+                {
+                    numsList.Add(up - 1);
+                }
+                if (isOneRowLeft && sideLeft >= 0)
+                {
+                    numsList.Add(sideLeft);
+                }
+                if (isOneRowLeft && down >= 0)
+                {
+                    numsList.Add(down - 1);
+                }
+                if (down >= 0)
+                {
+                    numsList.Add(down);
+                }
+                if (isOneRowRight && down >= 0)
+                {
+                    numsList.Add(down + 1);
+                }
+                if (isOneRowRight)
+                {
+                    numsList.Add(sideRight);
                 }
             }
         }
@@ -414,42 +430,42 @@ namespace square_algorithm
             {
                 if (NVector.X > 0 && NVector.Y > 0) //вправо вверх
                 {
-                    nums.setSquareSecond(areasCount, area);
+                    nums.setSquare_Right_Or_RightUp(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X > 0 && NVector.Y < 0) //вправо вниз
                 {
-                    nums.setSquareFirst(areasCount, area);
+                    nums.setSquare_Down_Or_RightDown(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X < 0 && NVector.Y < 0) //влево вниз
                 {
-                    nums.setSquareFourth(areasCount, area);
+                    nums.setSquare_Left_Or_LeftDown(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X < 0 && NVector.Y > 0) //влево вверх
                 {
-                    nums.setSquareThird(areasCount, area);
+                    nums.setSquare_Up_Or_UpLeft(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X == 0 && NVector.Y < 0) //вниз
                 {
-                    nums.setSquareFirst(areasCount, area);
+                    nums.setSquare_Down_Or_RightDown(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X == 0 && NVector.Y > 0) //вверх
                 {
-                    nums.setSquareThird(areasCount, area);
+                    nums.setSquare_Up_Or_UpLeft(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X > 0 && NVector.Y == 0) //вправо
                 {
-                    nums.setSquareSecond(areasCount, area);
+                    nums.setSquare_Right_Or_RightUp(areasCount, area);
                     numsList.Add(nums);
                 }
                 if (NVector.X < 0 && NVector.Y == 0) //влево
                 {
-                    nums.setSquareFourth(areasCount, area);
+                    nums.setSquare_Left_Or_LeftDown(areasCount, area);
                     numsList.Add(nums);
                 }
             }
@@ -461,22 +477,18 @@ namespace square_algorithm
             np.X = a; np.Y = b;
             return np;//возврат координат конца вектора, повернутые на 90 градусов во внеш.сторону
         }
-        public List<Nums> deleteNumsThatBehindBaseLine(ref List<Nums> list, Point SP, Point NP)
+        public bool isAreaBehindBaseLine(Area area, Point SP, Point NP)
         {
-            for (int i = 0; i < list.Count; i++)
+            int one, two, three, four;
+            one = Rotate(SP, NP, area.getVertice(0));
+            two = Rotate(SP, NP, area.getVertice(1));
+            three = Rotate(SP, NP, area.getVertice(2));
+            four = Rotate(SP, NP, area.getVertice(3));
+            if (one > 0 && two > 0 && three > 0 && four > 0)
             {
-                int one, two, three, four;
-                one = Rotate(SP, NP, areasList[list[i].mainNum].getVertice(0));
-                two = Rotate(SP, NP, areasList[list[i].mainNum].getVertice(1));
-                three = Rotate(SP, NP, areasList[list[i].mainNum].getVertice(2));
-                four = Rotate(SP, NP, areasList[list[i].mainNum].getVertice(3));
-
-                if (one > 0 && two > 0 && three > 0 && four > 0)
-                {
-                    list.RemoveAt(i);
-                }
+                return true;
             }
-            return list;
+            return false;
         }
         public void addCellsBypass(ref List<Nums> list, int areasCount, Point SP, Point NP, Point NVector)//задается нужный порядок обхода от базовой линии
         {
@@ -513,7 +525,7 @@ namespace square_algorithm
             {
                 for (int j = 0; j < list[i].numsList.Count; j++)
                 {
-                    if (!alreadyAddedAreas.Contains(list[i].numsList[j]))
+                    if (!alreadyAddedAreas.Contains(list[i].numsList[j]) && !isAreaBehindBaseLine(areasList[list[i].numsList[j]], SP, NP))
                     {
                         alreadyAddedAreas.Add(list[i].numsList[j]);
                         addNums(NVector, areasCount, list[i].numsList[j], ref list2);
@@ -524,7 +536,6 @@ namespace square_algorithm
                     }
                 }
             }
-            list2 = deleteNumsThatBehindBaseLine(ref list2, SP, NP);
             if (list2.Count != 0)
             {
                 addCellsBypass(ref list2, areasCount, SP, NP, NVector);
@@ -541,7 +552,7 @@ namespace square_algorithm
                 List<Nums> numsList = new List<Nums>();
                 numsList = getNumsByBaseLine(A, B);//вызов поиска областей для базовой линии
                 addCellsBypass(ref numsList, areasCount, A, B, NVector);//порядок обхода вызывается здесь..
-                setTriangle(in A, in B, ref areasByPass);
+                setTriangle(A, B, ref areasByPass);
                 if (lineQueue.Count > 0)
                 {
                     areasByPass.Clear();
@@ -556,14 +567,14 @@ namespace square_algorithm
             }
         }
 
-        public double getLineLength(in Point A, in Point B)
+        public double getLineLength(Point A, Point B)
         {
             double xVal = Math.Pow(B.X - A.X, 2);
             double yVal = Math.Pow(B.Y - A.Y, 2);
             double dist = Math.Sqrt(xVal + yVal);
             return dist;
         }
-        void setTriangle(in Point A, in Point B, ref List<int> numsByPass)
+        void setTriangle(Point A, Point B, ref List<int> numsByPass)
         {
             double AB = getLineLength(A, B); //c
             double finalGamma = 0;

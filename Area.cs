@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace square_algorithm
 {
-    class Area
+    public class Area
     {
         public Rectangle rect { get; set; }
         public List<Point> points { get; set; }
