@@ -9,10 +9,10 @@ namespace square_algorithm
 {
     public class Area
     {
-        public Rectangle rect { get; set; }
-        public List<Point> points { get; set; }
-        public List<Point> vertices { get; set; }
-        public bool wasVisited { get; set; }
+        public Rectangle rect;
+        public List<Point> points;
+        public List<Point> vertices;
+        public bool wasVisited;
 
         public Area(Rectangle _rect)
         {
