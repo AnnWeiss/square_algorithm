@@ -30,13 +30,11 @@
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.mainPictureBox = new System.Windows.Forms.PictureBox();
-            this.stepButton = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.genButton = new System.Windows.Forms.Button();
-            this.triangButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -57,8 +55,6 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.triangButton);
-            this.splitContainer1.Panel2.Controls.Add(this.stepButton);
             this.splitContainer1.Panel2.Controls.Add(this.label2);
             this.splitContainer1.Panel2.Controls.Add(this.textBox2);
             this.splitContainer1.Panel2.Controls.Add(this.label1);
@@ -75,16 +71,6 @@
             this.mainPictureBox.Size = new System.Drawing.Size(207, 207);
             this.mainPictureBox.TabIndex = 0;
             this.mainPictureBox.TabStop = false;
-            // 
-            // stepButton
-            // 
-            this.stepButton.Location = new System.Drawing.Point(24, 298);
-            this.stepButton.Name = "stepButton";
-            this.stepButton.Size = new System.Drawing.Size(151, 63);
-            this.stepButton.TabIndex = 5;
-            this.stepButton.Text = "Шаг триангуляции";
-            this.stepButton.UseVisualStyleBackColor = true;
-            this.stepButton.Click += new System.EventHandler(this.stepButton_Click);
             // 
             // label2
             // 
@@ -126,19 +112,9 @@
             this.genButton.Name = "genButton";
             this.genButton.Size = new System.Drawing.Size(151, 52);
             this.genButton.TabIndex = 0;
-            this.genButton.Text = "Сгенерировать точки";
+            this.genButton.Text = "Триангуляция";
             this.genButton.UseVisualStyleBackColor = true;
             this.genButton.Click += new System.EventHandler(this.genButton_Click);
-            // 
-            // triangButton
-            // 
-            this.triangButton.Location = new System.Drawing.Point(24, 389);
-            this.triangButton.Name = "triangButton";
-            this.triangButton.Size = new System.Drawing.Size(151, 57);
-            this.triangButton.TabIndex = 6;
-            this.triangButton.Text = "Триангуляция";
-            this.triangButton.UseVisualStyleBackColor = true;
-            this.triangButton.Click += new System.EventHandler(this.triangButton_Click);
             // 
             // Form1
             // 
@@ -168,8 +144,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Button stepButton;
-        private System.Windows.Forms.Button triangButton;
     }
 }
 
