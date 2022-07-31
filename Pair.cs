@@ -17,7 +17,10 @@ namespace square_algorithm
             Point1 = p1;
             Point2 = p2;
         }
+        public Pair()
+        {
 
+        }
         public override bool Equals(object obj)
         {
             return Equals(obj as Pair);

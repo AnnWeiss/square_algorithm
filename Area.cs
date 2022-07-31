@@ -13,12 +13,14 @@ namespace square_algorithm
         public List<Point> points;
         public List<Point> vertices;
         public bool wasVisited;
+        public List<Pair> pairsList;
 
         public Area(Rectangle _rect)
         {
             rect = _rect;
             points = new List<Point>();
             vertices = new List<Point>();
+            pairsList = new List<Pair>();
         }
         public Point getVertice(int value)
         {
