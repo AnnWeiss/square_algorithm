@@ -43,12 +43,10 @@ namespace square_algorithm
         public void CreateBitmapAtRuntime()
         {
             int areasize = 65;
-            /*if (areasCount < 2 || areasCount > 100)
+            if (areasCount < 2 || areasCount > 100)
             {
                 MessageBox.Show("Введите число от 2 до 100");
-            }*/
-            //areasCount = pointsCount / 100;
-            areasCount = 10;
+            }
             mainPictureBox.Size = new Size(areasize * areasCount, areasize * areasCount);
             bmp = new Bitmap(mainPictureBox.Size.Width, mainPictureBox.Size.Height);
             Graphics flagGraphics = Graphics.FromImage(bmp);
@@ -214,7 +212,7 @@ namespace square_algorithm
             }
 
             Point ANVector = new Point();
-            ANVector = getAntiNormalVector(SP, EP); //вектор нормали к базовой линии
+            ANVector = getAntiNormalVector(SP, EP); //вектор антинормали к базовой линии
 
             for (int i = xI1; i <= xI2; i++)//рассматриваем в диапазоне и добавляем в лист
             {
@@ -371,7 +369,7 @@ namespace square_algorithm
             }
             return false;
         }
-        public List<Nums> addAreasBypass(List<Nums> numslist, int areasCount, Point SP, Point EP, Point NVector)//задается нужный порядок обхода от базовой линии
+        public List<Nums> addAreasBypass(List<Nums> numslist, int areasCount, Point SP, Point EP, Point ANVector)//задается нужный порядок обхода от базовой линии
         {
             List<Nums> numslist2 = new List<Nums>();
             for (int i = 0; i < numslist.Count; i++)
@@ -381,7 +379,7 @@ namespace square_algorithm
                     if (!alreadyAddedAreas.Contains(numslist[i].numsList[j]) && !isAreaBehindBaseLine(areasList[numslist[i].numsList[j]], SP, EP))
                     {
                         alreadyAddedAreas.Add(numslist[i].numsList[j]);
-                        addNums(NVector, areasCount, numslist[i].numsList[j], numslist2);
+                        addNums(ANVector, areasCount, numslist[i].numsList[j], numslist2);
                     }
                     else
                     {
@@ -436,60 +434,80 @@ namespace square_algorithm
         {
             double AB = getLineLength(A, B); //c
             double finalGamma = 0;
-            int a = 0, n = 0;
             List<Point> newListPoints = new List<Point>();
+            //формируем лучших кандидатов на проверку
+            List<PointAndAngle> bestListPoints = new List<PointAndAngle>();
             //задаем дефолтные pairs для которых будем искать лучшую точку и менять их поле
             Pair newPair1 = new Pair(A, A);
             Pair newPair2 = new Pair(B, B);
+            //заполняем лист лучших точек
             for (int i = 0; i < areasByPass.Count; i++)
             {
                 newListPoints = areasList[areasByPass[i]].getListPoints();
                 for (int k = 0; k < newListPoints.Count; k++)//перебор листа поинтов area
                 {
+                    //проверяем, нужна ли нам эта точка
                     int val = Rotate(A, B, newListPoints[k]);
                     if (val < 0)
                     {
+                        PointAndAngle pointAndAngle = new PointAndAngle(newListPoints[k]);
+                        //вычисляем для каждой нужной точки угол
                         double AC = getLineLength(A, newListPoints[k]); //b
                         double CB = getLineLength(newListPoints[k], B); //a
                         double gamma = Math.Acos((CB * CB + AC * AC - AB * AB) / (2 * CB * AC)) * 180 / Math.PI;
-                        //варьируем поля для pair и проверяем на пересечение
-                        Pair newPairVarite1 = new Pair(A, areasList[areasByPass[i]].points[k]);
-                        Pair newPairVarite2 = new Pair(areasList[areasByPass[i]].points[k], B);
-                        bool isnewPairVarite1Crosses = areCrossing(newPairVarite1.Point1, newPairVarite1.Point2, numsList);
-                        bool isnewPairVariate2Crosses = areCrossing(newPairVarite2.Point1, newPairVarite2.Point2, numsList);
-
-                        if (gamma > finalGamma && !isnewPairVarite1Crosses && !isnewPairVariate2Crosses)//тут условие на пересечение
+                        pointAndAngle.setAngle(gamma);
+                        bestListPoints.Add(pointAndAngle);
+                        if (gamma > finalGamma)
                         {
                             finalGamma = gamma;
-                            //лучшая точка найдена, изменяем поля pairs
-                            newPair1.Point2 = areasList[areasByPass[i]].points[k];
-                            newPair2.Point1 = areasList[areasByPass[i]].points[k];
-                            a = k;
-                            n = i;
                         }
                     }
                 }
             }
             if (finalGamma > 0)
             {
-                Pair newPairInverted1 = new Pair(areasList[areasByPass[n]].points[a], A);
-                Pair newPairInverted2 = new Pair(B, areasList[areasByPass[n]].points[a]);
-                //проверяем наличие pair. Pair должен присутствовать единожды в множестве, поэтому пользуемся инвертированием
-                if (!pairsSet.Contains(newPair1) && !pairsSet.Contains(newPairInverted1))
+                //сортируем список по углу
+                AngleDescendingComparer angleDescComparer = new AngleDescendingComparer();
+                bestListPoints.Sort(angleDescComparer);
+                //перебераем отсортированный список
+                foreach (PointAndAngle p in bestListPoints)
                 {
-                    lineQueue.Enqueue(A);
-                    lineQueue.Enqueue(areasList[areasByPass[n]].points[a]);
-                    pairsSet.Add(newPair1);
-                    addPairToAreas(newPair1.Point1, newPair1.Point2);
+                    //варьируем поля для pair и проверяем на пересечение
+                    Pair newPairVarite1 = new Pair(A, p.point);
+                    Pair newPairVarite2 = new Pair(p.point, B);
+                    bool isnewPairVarite1Crosses = areCrossing(newPairVarite1.Point1, newPairVarite1.Point2, numsList);
+                    bool isnewPairVariate2Crosses = areCrossing(newPairVarite2.Point1, newPairVarite2.Point2, numsList);
+                    //если нет пересечения, делаем проверку на наличие в сете и добавляем в очередь
+                    if (!isnewPairVarite1Crosses && !isnewPairVariate2Crosses)
+                    {
+                        //проверяем наличие pair. Pair должен присутствовать единожды в множестве, поэтому пользуемся инвертированием
+                        Pair newPairInverted1 = new Pair(p.point, A);
+                        Pair newPairInverted2 = new Pair(B, p.point);
+                        //изменяем дефолтные pairs
+                        newPair1.Point2 = p.point;
+                        newPair2.Point1 = p.point;
+                        if (!pairsSet.Contains(newPair1) && !pairsSet.Contains(newPairInverted1))
+                        {
+                            lineQueue.Enqueue(A);
+                            lineQueue.Enqueue(p.point);
+                            pairsSet.Add(newPair1);
+                            addPairToAreas(newPair1.Point1, newPair1.Point2);
+                        }
+                        if (!pairsSet.Contains(newPair2) && !pairsSet.Contains(newPairInverted2))
+                        {
+                            lineQueue.Enqueue(p.point);
+                            lineQueue.Enqueue(B);
+                            pairsSet.Add(newPair2);
+                            addPairToAreas(newPair2.Point1, newPair2.Point2);
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
-                if (!pairsSet.Contains(newPair2) && !pairsSet.Contains(newPairInverted2))
-                {
-                    lineQueue.Enqueue(areasList[areasByPass[n]].points[a]);
-                    lineQueue.Enqueue(B);
-                    pairsSet.Add(newPair2);
-                    addPairToAreas(newPair2.Point1, newPair2.Point2);
-                }
-                return true;
+                return false;
             }
             else
             {
@@ -540,7 +558,7 @@ namespace square_algorithm
         }
         private void genButton_Click(object sender, EventArgs e)
         {
-            //areasCount = Convert.ToInt32(textBox1.Text);
+            areasCount = Convert.ToInt32(textBox1.Text);
             pointsCount = Convert.ToInt32(textBox2.Text);
             for(int i = 0; i < 1; i++)
             {
@@ -560,12 +578,12 @@ namespace square_algorithm
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
-                //sw.WriteLine(elapsedTime);
+                sw.WriteLine(elapsedTime);
                 //MessageBox.Show(elapsedTime);
                 stopwatch.Reset();
             }
             sw.Close();
-            //MessageBox.Show("!");
+            MessageBox.Show("!");
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
